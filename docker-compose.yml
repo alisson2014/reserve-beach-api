@@ -12,7 +12,7 @@ services:
     depends_on:
       - php
     ports:
-      - "80:80"
+      - "3004:80"
     volumes:
       - ./src/public:/var/www/html
     networks:
@@ -24,7 +24,11 @@ services:
       dockerfile: ./docker/php/Dockerfile
     container_name: reserve-beach-php
     volumes:
-      - ./src:/var/www/html
+      - ./src:/var/www/html/src
+      - ./public:/var/www/html/public
+      - ./config:/var/www/html/config
+      - ./var:/var/www/html/var
+      - ./.env:/var/www/html/.env
     networks:
       - reserve-beach
 
