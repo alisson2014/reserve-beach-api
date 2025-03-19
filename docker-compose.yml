@@ -17,6 +17,7 @@ services:
       - ./src/public:/var/www/html
     networks:
       - reserve-beach
+    restart: always
 
   php:
     build:
@@ -31,6 +32,7 @@ services:
       - ./.env:/var/www/html/.env
     networks:
       - reserve-beach
+    restart: always
 
   mysql:
     build:
@@ -38,14 +40,15 @@ services:
       dockerfile: Dockerfile
     container_name: reserve-beach-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: symfony
-      MYSQL_USER: symfony
-      MYSQL_PASSWORD: symfony
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
       - reserve-beach
+    restart: always
 
 volumes:
   mysql_data:
