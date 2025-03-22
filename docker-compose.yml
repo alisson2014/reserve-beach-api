@@ -24,6 +24,10 @@ services:
       context: .
       dockerfile: ./docker/php/Dockerfile
     container_name: reserve-beach-php
+    user: "${UID}:${GID}"
+    environment:
+      - UID=${UID}
+      - GID=${GID}
     volumes:
       - ./src:/var/www/html/src
       - ./public:/var/www/html/public
@@ -44,6 +48,7 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      PMA_ABSOLUTE_URI: http://localhost:8081/
     volumes:
       - mysql_data:/var/lib/mysql
     networks:

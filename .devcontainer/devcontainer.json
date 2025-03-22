@@ -1,19 +1,23 @@
 {
-	"name": "reserve-beach",
-	"dockerComposeFile": [
-		"../docker-compose.yml"
-	],
+	"name": "Reserve Beach Api",
+	"dockerComposeFile": "../docker-compose.yml",
 	"service": "php",
-  	"shutdownAction": "none",
-	"workspaceFolder": "/var/www/html/",
-	"extensions": [
-		"bmewburn.vscode-intelephense-client",
-		"hbenl.vscode-test-explorer",
-		"recca0120.vscode-phpunit",
-		"eamodio.gitlens",
-		"mhutchie.git-graph",
-		"junstyle.php-cs-fixer",
-		"janbn.git-last-commit-message",
-		"seatonjiang.gitmoji-vscode"
+	"workspaceFolder": "/var/www/html",
+	"remoteUser": "root",
+	"postCreateCommand": "chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html",
+	"customizations": {
+	  "vscode": {
+		"extensions": [
+		  "ms-azuretools.vscode-docker",
+		  "bmewburn.vscode-intelephense-client"
+		]
+	  }
+	},
+	"mounts": [
+		"source=${localWorkspaceFolder},target=/var/www/html,type=bind,consistency=cached",
+		"source=${localEnv:HOME}/.gitconfig,target=/root/.gitconfig,type=bind,consistency=cached",
+		"source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,consistency=cached"
 	]
-}
+  }
+  
+  
