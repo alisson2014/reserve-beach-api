@@ -1,5 +1,3 @@
-.github/
-
 .vscode/
 
 docker/*.bak
@@ -23,3 +21,4 @@ var/
 .env
 .env.*
 !.env.example
+!.env.dev
