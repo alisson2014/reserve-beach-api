@@ -17,7 +17,7 @@ services:
       - ./src/public:/var/www/html
     networks:
       - reserve-beach
-    restart: always
+    restart: on-failure
 
   php:
     build:
@@ -29,14 +29,14 @@ services:
       - UID=${UID}
       - GID=${GID}
     volumes:
-      - ./src:/var/www/html/src
-      - ./public:/var/www/html/public
-      - ./config:/var/www/html/config
-      - ./var:/var/www/html/var
-      - ./.env:/var/www/html/.env
+      - ./:/var/www/html/
     networks:
       - reserve-beach
-    restart: always
+    restart: on-failure
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - mysql
 
   mysql:
     build:
@@ -44,7 +44,7 @@ services:
       dockerfile: Dockerfile
     container_name: reserve-beach-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
@@ -53,7 +53,6 @@ services:
       - mysql_data:/var/lib/mysql
     networks:
       - reserve-beach
-    restart: always
 
 volumes:
   mysql_data:
