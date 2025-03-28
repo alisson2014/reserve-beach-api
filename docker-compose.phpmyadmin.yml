@@ -4,14 +4,12 @@ services:
     container_name: reserve-beach-phpmyadmin
     environment:
       PMA_HOST: reserve-beach-mysql
-      PMA_PORT: 3306
-      PMA_USER: ${MYSQL_USER}
-      PMA_PASSWORD: ${MYSQL_PASSWORD}
+      PMA_PORT: ${DB_PORT:-3306}
     ports:
-      - "8081:80"
+      - "${PMA_PORT:-8081}:80"
     networks:
       - reserve-beach
-    restart: always
+    restart: on-failure
 
 networks:
   reserve-beach:
