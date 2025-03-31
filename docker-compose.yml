@@ -14,7 +14,7 @@ services:
     ports:
       - "3004:80"
     volumes:
-      - ./src/public:/var/www/html
+      - ./:/var/www/html/:cached
     networks:
       - reserve-beach
     restart: on-failure
@@ -24,12 +24,8 @@ services:
       context: .
       dockerfile: ./docker/php/Dockerfile
     container_name: reserve-beach-php
-    user: "${UID}:${GID}"
-    environment:
-      - UID=${UID}
-      - GID=${GID}
     volumes:
-      - ./:/var/www/html/
+      - ./:/var/www/html/:cached
     networks:
       - reserve-beach
     restart: on-failure
@@ -39,21 +35,21 @@ services:
       - mysql
 
   mysql:
-    image: mysql:latest
+    image: mysql:${MYSQL_VERSION:-9.2.0}
     container_name: reserve-beach-mysql
     ports:
-      - ${DB_PORT:-3306}:3306
+      - ${DB_PORT:-8082}:3306
     environment:
-      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=${MYSQL_DATABASE:-reserve-beach}
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - TZ=America/Fortaleza
     volumes:
-      - ./docker/sql/:/docker-entrypoint-initdb.d/init.sql
-      - mysql_data:/var/lib/mysql
+      - ./docker/sql/:/docker-entrypoint-initdb.d/
+      - database_data:/var/lib/mysql
     networks:
       - reserve-beach
 
 volumes:
-  mysql_data:
+  database_data:

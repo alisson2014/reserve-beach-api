@@ -1,4 +1,0 @@
-CREATE DATABASE IF NOT EXISTS reserve-beach;
-CREATE USER IF NOT EXISTS 'symfony'@'%' IDENTIFIED BY 'symfony';
-GRANT ALL PRIVILEGES ON symfony.* TO 'symfony'@'%';
-FLUSH PRIVILEGES;
