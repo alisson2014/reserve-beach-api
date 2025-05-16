@@ -10,25 +10,28 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\HasLifecycleCallbacks]
 class Client
 {
+    public const STATUS_ACTIVE = 's';
+    public const STATUS_INACTIVE = 'n';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
     private ?int $id = null;
 
-    #[Orm\Column(type: "string", length: 50)]
+    #[ORM\Column(type: "string", length: 50)]
     private string $name;
 
-    #[Orm\Column(type: "string", length: 150)]
+    #[ORM\Column(type: "string", length: 150)]
     private string $lastName;
 
-    #[Orm\Column(type: "string", length: 254, unique: true)]
+    #[ORM\Column(type: "string", length: 254, unique: true)]
     private string $email;
 
-    #[Orm\Column(type: "string", length: 255)]
+    #[ORM\Column(type: "string", length: 255)]
     private string $password;
 
     #[ORM\Column(type: "string", length: 1, options: ["fixed" => true])]
-    private string $status = 's';
+    private string $status = self::STATUS_ACTIVE;
 
     #[ORM\Column(type: "string", length: 11, nullable: true)]
     private ?string $phone;
@@ -104,7 +107,7 @@ class Client
         return $this->phone;
     }
 
-    public function getCpf(): string 
+    public function getCpf(): ?string 
     {
         return $this->cpf;
     }
@@ -167,8 +170,8 @@ class Client
      */
     public function setStatus(string $status): self
     {
-        if (!in_array($status, ['s', 'n'])) {
-            throw new \InvalidArgumentException("Status deve ser 's' ou 'n'.");
+        if (!in_array($status, [self::STATUS_ACTIVE, self::STATUS_INACTIVE])) {
+            throw new \InvalidArgumentException("Status deve ser '" . self::STATUS_ACTIVE . "' ou '" . self::STATUS_INACTIVE . "'.");
         }
 
         $this->status = $status;
