@@ -4,11 +4,13 @@ namespace App\Entity;
 
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity]
 #[ORM\Table(name: "client")]
 #[ORM\HasLifecycleCallbacks]
-class Client
+class Client implements UserInterface, PasswordAuthenticatedUserInterface
 {
     public const STATUS_ACTIVE = 's';
     public const STATUS_INACTIVE = 'n';
@@ -61,6 +63,21 @@ class Client
         $this->updatedAt = new DateTime();
     }
 
+    public function getRoles(): array
+    {
+        return ['ROLE_USER'];
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return $this->email;
+    }
+
+    public function eraseCredentials(): void
+    {
+
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -79,17 +96,6 @@ class Client
     public function getEmail(): string 
     {
         return $this->email;
-    }
-
-    /**
-     * Verifica se a senha fornecida corresponde ao hash armazenado.
-     *
-     * @param string $plainPassword
-     * @return bool
-     */
-    public function verifyPassword(string $plainPassword): bool
-    {
-        return password_verify($plainPassword, $this->password);
     }
 
     public function getPassword(): string 
@@ -127,16 +133,49 @@ class Client
         return $this->birthDate;
     }
 
+    /**
+     * @param string $name
+     * @return self
+     * @throws \InvalidArgumentException
+     */
     public function setName(string $name): self 
     {
+        $this->validateVarName($name);
+
         $this->name = $name;
         return $this;
     }
 
     public function setLastName(string $lastName): self 
     {
+        $this->validateVarName($lastName, 150, "Sobrenome");
+
         $this->lastName = $lastName;
         return $this;
+    }
+
+    /**
+     * Valida o nome ou sobrenome.
+     *
+     * @param string $name
+     * @param int $maxLength
+     * @param string $type
+     * @return void
+     * @throws \InvalidArgumentException
+     */
+    private function validateVarName(string $name, int $maxLength = 50, string $type = "Nome"): void
+    {
+        if (empty($name)) {
+            throw new \InvalidArgumentException("{$type} não pode ser vazio.");
+        }
+
+        if (mb_strlen($name) > $maxLength) {
+            throw new \InvalidArgumentException("{$type} deve ter no máximo {$$maxLength} caracteres.");
+        }
+
+        if (preg_match('/[^a-zA-Z\s]/', $name)) {
+            throw new \InvalidArgumentException("{$type} deve conter apenas letras e espaços.");
+        }
     }
 
     /**
@@ -156,7 +195,7 @@ class Client
 
     public function setPassword(string $password): self 
     {
-        $this->password = password_hash($password, PASSWORD_BCRYPT);
+        $this->password = $password;
         return $this;
     }   
 
