@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\ClientStatus;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -12,9 +13,6 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 #[ORM\HasLifecycleCallbacks]
 class Client implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    public const STATUS_ACTIVE = 's';
-    public const STATUS_INACTIVE = 'n';
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
@@ -33,7 +31,7 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     private string $password;
 
     #[ORM\Column(type: "string", length: 1, options: ["fixed" => true])]
-    private string $status = self::STATUS_ACTIVE;
+    private ClientStatus $status = ClientStatus::ACTIVE;
 
     #[ORM\Column(type: "string", length: 11, nullable: true)]
     private ?string $phone;
@@ -42,7 +40,7 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $cpf;
 
     #[ORM\Column(type: "datetime", nullable: true)]
-    private DateTime $birthDate;
+    private ?DateTime $birthDate;
 
     #[ORM\Column(type: "datetime")]
     private DateTime $createdAt;
@@ -75,7 +73,6 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function eraseCredentials(): void
     {
-
     }
 
     public function getId(): ?int
@@ -103,7 +100,7 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->password;
     }
 
-    public function getStatus(): string
+    public function getStatus(): ClientStatus
     {
         return $this->status;
     }
@@ -133,62 +130,26 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->birthDate;
     }
 
-    /**
-     * @param string $name
-     * @return self
-     * @throws \InvalidArgumentException
-     */
+    public function setId(int $id): self 
+    {
+        $this->id = $id;
+        return $this;
+    }
+
     public function setName(string $name): self 
     {
-        $this->validateVarName($name);
-
         $this->name = $name;
         return $this;
     }
 
     public function setLastName(string $lastName): self 
     {
-        $this->validateVarName($lastName, 150, "Sobrenome");
-
         $this->lastName = $lastName;
         return $this;
     }
 
-    /**
-     * Valida o nome ou sobrenome.
-     *
-     * @param string $name
-     * @param int $maxLength
-     * @param string $type
-     * @return void
-     * @throws \InvalidArgumentException
-     */
-    private function validateVarName(string $name, int $maxLength = 50, string $type = "Nome"): void
-    {
-        if (empty($name)) {
-            throw new \InvalidArgumentException("{$type} não pode ser vazio.");
-        }
-
-        if (mb_strlen($name) > $maxLength) {
-            throw new \InvalidArgumentException("{$type} deve ter no máximo {$$maxLength} caracteres.");
-        }
-
-        if (preg_match('/[^a-zA-Z\s]/', $name)) {
-            throw new \InvalidArgumentException("{$type} deve conter apenas letras e espaços.");
-        }
-    }
-
-    /**
-     * @param string $email
-     * @return self
-     * @throws \InvalidArgumentException
-     */
     public function setEmail(string $email): self
     {
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 254) {
-            throw new \InvalidArgumentException("Email inválido.");
-        }
-
         $this->email = $email;
         return $this;
     }
@@ -199,40 +160,20 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }   
 
-    /**
-     * Define o status do cliente.
-     * Aceita apenas 's' (sim) ou 'n' (não).
-     *
-     * @param string $status
-     * @return self
-     * @throws \InvalidArgumentException
-     */
-    public function setStatus(string $status): self
+    public function setStatus(ClientStatus $status): self
     {
-        if (!in_array($status, [self::STATUS_ACTIVE, self::STATUS_INACTIVE])) {
-            throw new \InvalidArgumentException("Status deve ser '" . self::STATUS_ACTIVE . "' ou '" . self::STATUS_INACTIVE . "'.");
-        }
-
         $this->status = $status;
         return $this;
     }
 
     public function setPhone(?string $phone): self 
     {
-        if (!is_null($phone) && !preg_match('/^\d{11}$/', $phone)) {
-            throw new \InvalidArgumentException("Telefone deve conter 11 dígitos.");
-        }
-
         $this->phone = $phone;
         return $this;
     }
 
     public function setCpf(?string $cpf): self 
     {
-        if (!is_null($cpf) && !preg_match('/^\d{11}$/', $cpf)) {
-            throw new \InvalidArgumentException("CPF deve conter 11 dígitos.");
-        }
-
         $this->cpf = $cpf;
         return $this;
     }
@@ -245,10 +186,6 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setBirthDate(?DateTime $birthDate): self 
     {
-        if (!is_null($birthDate) && $birthDate > new DateTime()) {
-            throw new \InvalidArgumentException("Data de nascimento não pode ser futura.");
-        }
-
         $this->birthDate = $birthDate;
         return $this;
     }
