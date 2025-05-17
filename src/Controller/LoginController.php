@@ -41,8 +41,8 @@ class LoginController extends AbstractController
             return $this->json(['errors' => $this->formatValidationErrors($errors)], Response::HTTP_BAD_REQUEST);
         }
 
-        $client = $this->clientRepository->getByEmail($data['email']);
-        if (is_null($client) || !$passwordHasher->isPasswordValid($client, $data['password'])) {
+        $client = $this->clientRepository->getByEmail($loginDto->email);
+        if (is_null($client) || !$passwordHasher->isPasswordValid($client, $loginDto->password)) {
             return $this->json(['errors' => 'Credenciais inválidas.'], Response::HTTP_UNAUTHORIZED);
         }
 
