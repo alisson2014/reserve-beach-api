@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Dto\RegisterDto;
-use InvalidArgumentException;
 use App\Entity\Client;
 use App\Repository\ClientRepository;
 use App\Utils\ValidationErrorFormatterTrait;
@@ -45,25 +44,23 @@ class RegisterController extends AbstractController
         }
 
         if ($this->clientRepository->getByEmail($data['email'])) {
-            return $this->json(['error' => 'Email já cadastrado.'], Response::HTTP_CONFLICT);
+            return $this->json(['errors' => 'Email já cadastrado.'], Response::HTTP_CONFLICT);
         }
-        
+
+        $client = Client::getFromRegisterDto($registerDto);
+        $client->setPassword(
+            $passwordHasher->hashPassword($client, $data['password'])
+        );
+
         try {
-            $client = new Client();
-            $client->setName($data['name']);
-            $client->setLastName($data['lastName']);
-            $client->setEmail($data['email']);
-            $client->setPassword(
-                $passwordHasher->hashPassword($client, $data['password'])
-            );
-        } catch (InvalidArgumentException $ex) {
-            return $this->json(['error' => $ex->getMessage()], Response::HTTP_BAD_REQUEST);
+            $this->clientRepository->add($client, true);
         } catch (\Exception $ex) {
-            return $this->json(['error' => 'Erro ao cadastrar cliente.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->json(['error' => 'Erro ao cadastrar cliente.' . $ex->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        $this->clientRepository->add($client, true);
-
-        return $this->json(['message' => 'Client registered successfully.'], Response::HTTP_CREATED);
+        return $this->json([
+            'message' => "Cliente {$client->getName()} cadastrado com sucesso!",
+            'data' => $client->toArray(),
+        ], Response::HTTP_CREATED);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Dto\RegisterDto;
 use App\Enum\ClientStatus;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
@@ -31,22 +32,31 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     private string $password;
 
     #[ORM\Column(type: "string", length: 1, options: ["fixed" => true])]
-    private ClientStatus $status = ClientStatus::ACTIVE;
+    private string $status = ClientStatus::ACTIVE->value;
 
     #[ORM\Column(type: "string", length: 11, nullable: true)]
-    private ?string $phone;
+    private ?string $phone = null;
 
     #[ORM\Column(type: "string", length: 11, nullable: true)]
-    private ?string $cpf;
+    private ?string $cpf = null;
 
     #[ORM\Column(type: "datetime", nullable: true)]
-    private ?DateTime $birthDate;
+    private ?DateTime $birthDate = null;
 
     #[ORM\Column(type: "datetime")]
     private DateTime $createdAt;
 
     #[ORM\Column(type: "datetime", nullable: true)]
-    private ?DateTime $updatedAt;
+    private ?DateTime $updatedAt = null;
+
+    public static function getFromRegisterDto(RegisterDto $registerDto): self
+    {
+        $client = new self();
+        $client->setName($registerDto->name);
+        $client->setLastName($registerDto->lastName);
+        $client->setEmail($registerDto->email);
+        return $client;
+    }
 
     #[ORM\PrePersist]
     public function onPrePersist(): void
@@ -100,7 +110,7 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->password;
     }
 
-    public function getStatus(): ClientStatus
+    public function getStatus(): string
     {
         return $this->status;
     }
@@ -162,7 +172,7 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setStatus(ClientStatus $status): self
     {
-        $this->status = $status;
+        $this->status = $status->value;
         return $this;
     }
 
@@ -188,5 +198,21 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->birthDate = $birthDate;
         return $this;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->getId(),
+            'name' => $this->getName(),
+            'lastName' => $this->getLastName(),
+            'email' => $this->getEmail(),
+            'status' => $this->getStatus(),
+            'phone' => $this->getPhone(),
+            'cpf' => $this->getCpf(),
+            'birthDate' => $this->getBirthDate() ? $this->getBirthDate()->format('Y-m-d') : null,
+            'createdAt' => $this->getCreatedAt()->format('Y-m-d H:i:s'),
+            'updatedAt' => $this->getUpdatedAt() ? $this->getUpdatedAt()->format('Y-m-d H:i:s') : null
+        ];
     }
 }
