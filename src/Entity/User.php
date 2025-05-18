@@ -37,7 +37,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: "string", length: 11, nullable: true)]
     private ?string $phone = null;
 
-    #[ORM\Column(type: "string", length: 11, nullable: true)]
+    #[ORM\Column(type: "string", length: 11, nullable: true, unique: true)]
     private ?string $cpf = null;
 
     #[ORM\Column(type: "date_immutable", nullable: true)]
