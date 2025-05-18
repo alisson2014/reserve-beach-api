@@ -40,6 +40,9 @@ COPY . /var/www/html
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html
 
+RUN chown www-data:www-data /var/www/html/config/jwt/private.pem && \
+    chmod 400 /var/www/html/config/jwt/private.pem
+
 RUN mkdir -p /var/www/html/var/cache /var/www/html/var/log \
     && chown -R www-data:www-data /var/www/html/var \
     && chmod -R 775 /var/www/html/var/cache /var/www/html/var/log

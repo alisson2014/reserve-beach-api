@@ -3,8 +3,8 @@
 namespace App\Controller;
 
 use App\Dto\RegisterDto;
-use App\Entity\Client;
-use App\Repository\ClientRepository;
+use App\Entity\User;
+use App\Repository\UserRepository;
 use App\Utils\ValidationErrorFormatterTrait;
 use Symfony\Component\HttpFoundation\{Request, JsonResponse, Response};
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -16,14 +16,14 @@ class RegisterController extends AbstractController
 {
     use ValidationErrorFormatterTrait;
 
-    private ClientRepository $clientRepository;
+    private UserRepository $userRepository;
 
-    public function __construct(ClientRepository $clientRepository)
+    public function __construct(UserRepository $userRepository)
     {
-        $this->clientRepository = $clientRepository;
+        $this->userRepository = $userRepository;
     }
 
-    #[Route('/api/client/register', name: 'client_register', methods: ['POST'])]
+    #[Route('/api/user/register', name: 'user_register', methods: ['POST'])]
     public function index(
         Request $request,
         UserPasswordHasherInterface $passwordHasher,
@@ -43,24 +43,24 @@ class RegisterController extends AbstractController
             return $this->json(['errors' => $this->formatValidationErrors($errors)], Response::HTTP_BAD_REQUEST);
         }
 
-        if ($this->clientRepository->getByEmail($data['email'])) {
+        if ($this->userRepository->getByEmail($data['email'])) {
             return $this->json(['errors' => 'Email já cadastrado.'], Response::HTTP_CONFLICT);
         }
 
-        $client = Client::getFromRegisterDto($registerDto);
-        $client->setPassword(
-            $passwordHasher->hashPassword($client, $data['password'])
+        $user = User::getFromRegisterDto($registerDto);
+        $user->setPassword(
+            $passwordHasher->hashPassword($user, $data['password'])
         );
 
         try {
-            $this->clientRepository->add($client, true);
+            $this->userRepository->add($user, true);
         } catch (\Exception $ex) {
             return $this->json(['error' => 'Erro ao cadastrar cliente.' . $ex->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         return $this->json([
-            'message' => "Cliente {$client->getName()} cadastrado com sucesso!",
-            'data' => $client->toArray(),
+            'message' => "Cliente {$user->getName()} cadastrado com sucesso!",
+            'data' => $user->toArray(),
         ], Response::HTTP_CREATED);
     }
 }

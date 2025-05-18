@@ -3,16 +3,16 @@
 namespace App\Entity;
 
 use App\Dto\RegisterDto;
-use App\Enum\ClientStatus;
-use DateTime;
+use App\Enum\UserStatus;
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity]
-#[ORM\Table(name: "client")]
+#[ORM\Table(name: "users")]
 #[ORM\HasLifecycleCallbacks]
-class Client implements UserInterface, PasswordAuthenticatedUserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -31,8 +31,8 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: "string", length: 255)]
     private string $password;
 
-    #[ORM\Column(type: "string", length: 1, options: ["fixed" => true])]
-    private string $status = ClientStatus::ACTIVE->value;
+    #[ORM\Column(enumType: UserStatus::class, length: 1, options: ["fixed" => true])] 
+    private UserStatus $status = UserStatus::ACTIVE;
 
     #[ORM\Column(type: "string", length: 11, nullable: true)]
     private ?string $phone = null;
@@ -40,40 +40,51 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: "string", length: 11, nullable: true)]
     private ?string $cpf = null;
 
-    #[ORM\Column(type: "datetime", nullable: true)]
-    private ?DateTime $birthDate = null;
+    #[ORM\Column(type: "date_immutable", nullable: true)]
+    private ?DateTimeImmutable $birthDate = null;
 
-    #[ORM\Column(type: "datetime")]
-    private DateTime $createdAt;
+    #[ORM\Column(type: "datetime_immutable")]
+    private DateTimeImmutable $createdAt;
 
-    #[ORM\Column(type: "datetime", nullable: true)]
-    private ?DateTime $updatedAt = null;
+    #[ORM\Column(type: "datetime_immutable", nullable: true)]
+    private ?DateTimeImmutable $updatedAt = null;
+
+    #[ORM\Column(type: "json")]
+    private array $roles = ['ROLE_USER'];
+
+    #[ORM\Column(type: "string", length: 100, nullable: true)]
+    private ?string $position = null;
+
+    public function __construct()
+    {
+        $this->createdAt = new DateTimeImmutable();
+        $this->roles = ['ROLE_USER'];
+    }
 
     public static function getFromRegisterDto(RegisterDto $registerDto): self
     {
-        $client = new self();
-        $client->setName($registerDto->name);
-        $client->setLastName($registerDto->lastName);
-        $client->setEmail($registerDto->email);
-        return $client;
-    }
-
-    #[ORM\PrePersist]
-    public function onPrePersist(): void
-    {
-        $now = new DateTime();
-        $this->createdAt = $now;
+        $user = new self();
+        $user->setName($registerDto->name);
+        $user->setLastName($registerDto->lastName);
+        $user->setEmail($registerDto->email);
+        return $user;
     }
 
     #[ORM\PreUpdate]
     public function onPreUpdate(): void
     {
-        $this->updatedAt = new DateTime();
+        $this->updatedAt = new DateTimeImmutable();
     }
 
     public function getRoles(): array
     {
-        return ['ROLE_USER'];
+        $roles = $this->roles;
+
+        if (!in_array('ROLE_USER', $roles)) {
+            $roles[] = 'ROLE_USER';
+        }
+
+        return array_unique($roles);
     }
 
     public function getUserIdentifier(): string
@@ -110,7 +121,7 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->password;
     }
 
-    public function getStatus(): string
+    public function getStatus(): UserStatus
     {
         return $this->status;
     }
@@ -125,25 +136,24 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->cpf;
     }
 
-    public function getCreatedAt(): DateTime 
+    public function getCreatedAt(): DateTimeImmutable 
     {
         return $this->createdAt;
     }
     
-    public function getUpdatedAt(): ?DateTime 
+    public function getUpdatedAt(): ?DateTimeImmutable 
     {
         return $this->updatedAt;
     }
 
-    public function getBirthDate(): ?DateTime 
+    public function getBirthDate(): ?DateTimeImmutable 
     {
         return $this->birthDate;
     }
 
-    public function setId(int $id): self 
+    public function getPosition(): ?string
     {
-        $this->id = $id;
-        return $this;
+        return $this->position;
     }
 
     public function setName(string $name): self 
@@ -170,9 +180,9 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }   
 
-    public function setStatus(ClientStatus $status): self
+    public function setStatus(UserStatus $status): self
     {
-        $this->status = $status->value;
+        $this->status = $status;
         return $this;
     }
 
@@ -188,15 +198,21 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function setUpdatedAt(DateTime $updatedAt): self 
+    public function setBirthDate(?DateTimeImmutable $birthDate): self 
     {
-        $this->updatedAt = $updatedAt;
+        $this->birthDate = $birthDate;
         return $this;
     }
 
-    public function setBirthDate(?DateTime $birthDate): self 
+    public function setRoles(array $roles): self
     {
-        $this->birthDate = $birthDate;
+        $this->roles = $roles;
+        return $this;
+    }
+
+    public function setPosition(?string $position): self
+    {
+        $this->position = $position;
         return $this;
     }
 
@@ -207,12 +223,14 @@ class Client implements UserInterface, PasswordAuthenticatedUserInterface
             'name' => $this->getName(),
             'lastName' => $this->getLastName(),
             'email' => $this->getEmail(),
-            'status' => $this->getStatus(),
+            'status' => $this->getStatus()->value,
             'phone' => $this->getPhone(),
             'cpf' => $this->getCpf(),
             'birthDate' => $this->getBirthDate() ? $this->getBirthDate()->format('Y-m-d') : null,
             'createdAt' => $this->getCreatedAt()->format('Y-m-d H:i:s'),
-            'updatedAt' => $this->getUpdatedAt() ? $this->getUpdatedAt()->format('Y-m-d H:i:s') : null
+            'updatedAt' => $this->getUpdatedAt() ? $this->getUpdatedAt()->format('Y-m-d H:i:s') : null,
+            'roles' => $this->getRoles(),
+            'position' => $this->getPosition(),
         ];
     }
 }

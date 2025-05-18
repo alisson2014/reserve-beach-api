@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Dto\LoginDto;
-use App\Repository\ClientRepository;
+use App\Repository\UserRepository;
 use App\Utils\ValidationErrorFormatterTrait;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
@@ -16,14 +16,14 @@ class LoginController extends AbstractController
 {
     use ValidationErrorFormatterTrait;
 
-    private ClientRepository $clientRepository; 
+    private UserRepository $userRepository; 
 
-    public function __construct(ClientRepository $clientRepository)
+    public function __construct(UserRepository $userRepository)
     {
-        $this->clientRepository = $clientRepository;
+        $this->userRepository = $userRepository;
     }
 
-    #[Route('/api/client/login', name: 'client_login', methods: ['POST'])]
+    #[Route('/api/user/login', name: 'user_login', methods: ['POST'])]
     public function index(
         Request $request,
         UserPasswordHasherInterface $passwordHasher,
@@ -41,12 +41,12 @@ class LoginController extends AbstractController
             return $this->json(['errors' => $this->formatValidationErrors($errors)], Response::HTTP_BAD_REQUEST);
         }
 
-        $client = $this->clientRepository->getByEmail($loginDto->email);
-        if (is_null($client) || !$passwordHasher->isPasswordValid($client, $loginDto->password)) {
+        $user = $this->userRepository->getByEmail($loginDto->email);
+        if (is_null($user) || !$passwordHasher->isPasswordValid($user, $loginDto->password)) {
             return $this->json(['errors' => 'Credenciais inválidas.'], Response::HTTP_UNAUTHORIZED);
         }
 
-        $token = $jwtManager->create($client);
+        $token = $jwtManager->create($user);
 
         return $this->json(compact('token'), Response::HTTP_OK);
     }
