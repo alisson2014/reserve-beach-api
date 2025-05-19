@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
 use App\Dto\RegisterDto;
+use App\Enum\Position;
 use App\Enum\UserStatus;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
@@ -52,13 +55,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: "json")]
     private array $roles = ['ROLE_USER'];
 
-    #[ORM\Column(type: "string", length: 100, nullable: true)]
-    private ?string $position = null;
+    #[ORM\Column(enumType: Position::class, length: 2, options: ["fixed" => true], nullable: true)] 
+    private ?Position $position = null;
 
     public function __construct()
     {
         $this->createdAt = new DateTimeImmutable();
-        $this->roles = ['ROLE_USER'];
     }
 
     public static function getFromRegisterDto(RegisterDto $registerDto): self
@@ -151,7 +153,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->birthDate;
     }
 
-    public function getPosition(): ?string
+    public function getPosition(): ?Position
     {
         return $this->position;
     }
@@ -210,7 +212,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function setPosition(?string $position): self
+    public function setPosition(?Position $position): self
     {
         $this->position = $position;
         return $this;

@@ -12,9 +12,11 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-        main:
-            lazy: true
+        api:
+            pattern: ^/api/
+            stateless: true
             provider: user_provider
+            jwt: ~  
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
