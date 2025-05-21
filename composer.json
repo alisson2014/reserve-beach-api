@@ -60,7 +60,11 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
-        ]
+        ],
+        "migrate": "php bin/console doctrine:migrations:migrate --no-interaction",
+        "generate-migrations": "php bin/console migrations:diff",
+        "generate-custom-migration": "php bin/console migrations:generate"
+    
     },
     "conflict": {
         "symfony/symfony": "*"

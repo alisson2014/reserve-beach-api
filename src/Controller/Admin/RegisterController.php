@@ -42,6 +42,14 @@ class RegisterController extends AbstractController
             return $this->json(['errors' => $this->formatValidationErrors($errors)], Response::HTTP_BAD_REQUEST);
         }
 
+        $user = $this->getUser();
+        $email = $user->getUserIdentifier();
+        $user = $userRepository->getByEmail($email);
+
+        if ($user?->getPosition() !== Position::MANAGER) {
+            return $this->json(['errors' => 'Você não tem permissão para cadastrar outros administradores.'], Response::HTTP_FORBIDDEN);
+        }
+
         if ($userRepository->getByEmail($data['email'])) {
             return $this->json(['errors' => 'Email já cadastrado.'], Response::HTTP_CONFLICT);
         }
@@ -59,9 +67,12 @@ class RegisterController extends AbstractController
             return $this->json(['error' => 'Erro ao cadastrar administrador.' . $ex->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        return $this->json([
-            'message' => "Administrador {$user->getName()} cadastrado com sucesso!",
-            'data' => $user->toArray(),
-        ], Response::HTTP_CREATED);
+        return $this->json(
+            [
+                'message' => "Administrador {$user->getName()} cadastrado com sucesso!",
+                'data' => $user->toArray(),
+            ], 
+            Response::HTTP_CREATED
+        );
     }
 }

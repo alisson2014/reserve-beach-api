@@ -18,7 +18,7 @@ class RegisterController extends AbstractController
 {
     use ValidationErrorFormatterTrait;
 
-    #[Route('/api/user/register', name: 'user_register', methods: ['POST'])]
+    #[Route('/api/client/register', name: 'user_register', methods: ['POST'])]
     public function index(
         Request $request,
         UserPasswordHasherInterface $passwordHasher,
@@ -54,9 +54,12 @@ class RegisterController extends AbstractController
             return $this->json(['error' => 'Erro ao cadastrar cliente.' . $ex->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        return $this->json([
-            'message' => "Cliente {$user->getName()} cadastrado com sucesso!",
-            'data' => $user->toArray(),
-        ], Response::HTTP_CREATED);
+        return $this->json(
+            [
+                'message' => "Cliente {$user->getName()} cadastrado com sucesso!",
+                'data' => $user->toArray(),
+            ], 
+            Response::HTTP_CREATED
+        );
     }
 }
