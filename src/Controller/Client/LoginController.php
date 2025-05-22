@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Controller\Client;
 
 use App\Dto\LoginDto;
-use App\Repository\UserRepository;
+use App\Repository\UserRepository\IUserRepository;
 use App\Utils\ValidationErrorFormatterTrait;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
@@ -24,7 +24,7 @@ class LoginController extends AbstractController
         UserPasswordHasherInterface $passwordHasher,
         JWTTokenManagerInterface $jwtManager,
         ValidatorInterface $validator,
-        UserRepository $userRepository
+        IUserRepository $userRepository
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
 

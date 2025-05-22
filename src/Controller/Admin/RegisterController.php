@@ -7,7 +7,7 @@ namespace App\Controller\Admin;
 use App\Dto\RegisterDto;
 use App\Entity\User;
 use App\Enum\Position;
-use App\Repository\UserRepository;
+use App\Repository\UserRepository\IUserRepository;
 use App\Utils\ValidationErrorFormatterTrait;
 use Symfony\Component\HttpFoundation\{Request, JsonResponse, Response};
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -26,7 +26,7 @@ class RegisterController extends AbstractController
         Request $request,
         UserPasswordHasherInterface $passwordHasher,
         ValidatorInterface $validator,
-        UserRepository $userRepository
+        IUserRepository $userRepository
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
 

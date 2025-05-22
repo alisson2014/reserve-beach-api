@@ -7,15 +7,17 @@ namespace App\Entity;
 use App\Dto\RegisterDto;
 use App\Enum\Position;
 use App\Enum\UserStatus;
+use App\Interface\Arrayable;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
+use Override;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity]
 #[ORM\Table(name: "users")]
 #[ORM\HasLifecycleCallbacks]
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface, Arrayable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -218,6 +220,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    #[Override]
     public function toArray(): array
     {
         return [
