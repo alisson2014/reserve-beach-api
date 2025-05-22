@@ -8,6 +8,7 @@ use App\Dto\CourtTypeDto;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use App\Interface\Arrayable;
+use Doctrine\Common\Collections\Collection;
 use Override;
 
 #[ORM\Entity]
@@ -28,6 +29,9 @@ class CourtType implements Arrayable
 
     #[ORM\Column(type: "datetime_immutable", nullable: true)]
     private ?DateTimeImmutable $updatedAt = null;
+
+    #[ORM\OneToMany(mappedBy: "courtType", targetEntity: Court::class)]
+    private Collection $courts;
 
     public function __construct()
     {
@@ -67,10 +71,9 @@ class CourtType implements Arrayable
         return $this->updatedAt;
     }
 
-    public function setId(int $id): self
+    public function getCourts(): Collection
     {
-        $this->id = $id;
-        return $this;
+        return $this->courts;
     }
 
     public function setName(string $name): self

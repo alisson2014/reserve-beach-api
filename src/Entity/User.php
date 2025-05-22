@@ -216,9 +216,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Arrayab
             'status' => $this->getStatus()->value,
             'phone' => $this->getPhone(),
             'cpf' => $this->getCpf(),
-            'birthDate' => $this->getBirthDate() ? $this->getBirthDate()->format('Y-m-d') : null,
-            'createdAt' => $this->getCreatedAt()->format('Y-m-d H:i:s'),
-            'updatedAt' => $this->getUpdatedAt() ? $this->getUpdatedAt()->format('Y-m-d H:i:s') : null,
+            'birthDate' => $this->getBirthDate() ?: null,
+            'createdAt' => $this->getCreatedAt(),
+            'updatedAt' => $this->getUpdatedAt() ?: null,
             'roles' => $this->getRoles()
         ];
     }
