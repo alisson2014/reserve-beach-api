@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace DoctrineMigrations;
 
-use App\Enum\Position;
 use App\Enum\UserStatus;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
@@ -25,16 +24,14 @@ final class Version20250518235719 extends AbstractMigration
     {
         $hashedPassword = '$2y$13$U4s0Drkb1ewWfBptnn/RJu/d8QuMfgEHLEqDyra9Mf3MkkDN7nC.u';
         $active = UserStatus::ACTIVE->value;
-        $manager = Position::MANAGER->value;
-        $this->addSql("INSERT INTO users (name, last_name, email, password, status, created_at, roles, position) VALUES (
+        $this->addSql("INSERT INTO users (name, last_name, email, password, status, created_at, roles) VALUES (
             'Root',
             'User',
             :email,
             '{$hashedPassword}',
             '{$active}',
             NOW(),
-            '[\"ROLE_SUPER_ADMIN\", \"ROLE_ADMIN\", \"ROLE_USER\"]',
-            '{$manager}'
+            '[\"ROLE_SUPER_ADMIN\", \"ROLE_ADMIN\", \"ROLE_USER\"]'
         )", ['email' => self::USER_EMAIL]);
     }
 

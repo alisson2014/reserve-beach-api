@@ -6,7 +6,6 @@ namespace App\Controller\Admin;
 
 use App\Dto\RegisterDto;
 use App\Entity\User;
-use App\Enum\Position;
 use App\Repository\UserRepository\IUserRepository;
 use App\Utils\ValidationErrorFormatterTrait;
 use Symfony\Component\HttpFoundation\{Request, JsonResponse, Response};
@@ -42,14 +41,6 @@ class RegisterController extends AbstractController
             return $this->json(['errors' => $this->formatValidationErrors($errors)], Response::HTTP_BAD_REQUEST);
         }
 
-        $user = $this->getUser();
-        $email = $user->getUserIdentifier();
-        $user = $userRepository->getByEmail($email);
-
-        if ($user?->getPosition() !== Position::MANAGER) {
-            return $this->json(['errors' => 'Você não tem permissão para cadastrar outros administradores.'], Response::HTTP_FORBIDDEN);
-        }
-
         if ($userRepository->getByEmail($data['email'])) {
             return $this->json(['errors' => 'Email já cadastrado.'], Response::HTTP_CONFLICT);
         }
@@ -59,7 +50,6 @@ class RegisterController extends AbstractController
             $passwordHasher->hashPassword($user, $data['password'])
         );
         $user->setRoles(['ROLE_ADMIN']);
-        $user->setPosition(Position::from($data['position'] ?? Position::EMPLOYEE->value));
 
         try {
             $userRepository->add($user, true);

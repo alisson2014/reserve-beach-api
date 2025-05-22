@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Dto\RegisterDto;
-use App\Enum\Position;
 use App\Enum\UserStatus;
 use App\Interface\Arrayable;
 use DateTimeImmutable;
@@ -56,9 +55,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Arrayab
 
     #[ORM\Column(type: "json")]
     private array $roles = ['ROLE_USER'];
-
-    #[ORM\Column(enumType: Position::class, length: 2, options: ["fixed" => true], nullable: true)] 
-    private ?Position $position = null;
 
     public function __construct()
     {
@@ -155,11 +151,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Arrayab
         return $this->birthDate;
     }
 
-    public function getPosition(): ?Position
-    {
-        return $this->position;
-    }
-
     public function setName(string $name): self 
     {
         $this->name = $name;
@@ -214,12 +205,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Arrayab
         return $this;
     }
 
-    public function setPosition(?Position $position): self
-    {
-        $this->position = $position;
-        return $this;
-    }
-
     #[Override]
     public function toArray(): array
     {
@@ -234,8 +219,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Arrayab
             'birthDate' => $this->getBirthDate() ? $this->getBirthDate()->format('Y-m-d') : null,
             'createdAt' => $this->getCreatedAt()->format('Y-m-d H:i:s'),
             'updatedAt' => $this->getUpdatedAt() ? $this->getUpdatedAt()->format('Y-m-d H:i:s') : null,
-            'roles' => $this->getRoles(),
-            'position' => $this->getPosition(),
+            'roles' => $this->getRoles()
         ];
     }
 }
