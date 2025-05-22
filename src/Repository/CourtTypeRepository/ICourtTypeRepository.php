@@ -20,5 +20,5 @@ interface ICourtTypeRepository
 
     public function update(CourtType $courtType, bool $flush = false): CourtType;
 
-    public function remove(CourtType $entity, bool $flush = false): void;
+    public function remove(CourtType $courtType, bool $flush = false): void;
 }

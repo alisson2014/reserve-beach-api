@@ -34,7 +34,6 @@ class Court implements Arrayable
     #[ORM\Column(type: "string", length: 1, options: ["fixed" => true])]
     private string $status;
 
-    #[ORM\Column(type: "integer")]
     #[ORM\ManyToOne(targetEntity: CourtType::class)]
     #[ORM\JoinColumn(name: "court_type_id", referencedColumnName: "id", nullable: false)]
     private CourtType $courtType;
