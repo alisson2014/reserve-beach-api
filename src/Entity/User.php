@@ -206,6 +206,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Arrayab
     }
 
     #[Override]
+    public function __toString(): string
+    {
+        return $this->name . ' ' . $this->lastName;
+    }
+
+    #[Override]
     public function toArray(): array
     {
         return [

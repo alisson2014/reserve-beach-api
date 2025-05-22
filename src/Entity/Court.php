@@ -137,6 +137,12 @@ class Court implements Arrayable
     }
 
     #[Override]
+    public function __toString(): string
+    {
+        return $this->name;
+    }
+
+    #[Override]
     public function toArray(): array
     {
         return [
