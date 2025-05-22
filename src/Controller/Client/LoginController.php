@@ -34,16 +34,16 @@ class LoginController extends AbstractController
 
         $errors = $validator->validate($loginDto);
         if (count($errors) > 0) {
-            return $this->json(['errors' => $this->formatValidationErrors($errors)], Response::HTTP_BAD_REQUEST);
+            return $this->json(['status' => false, 'errors' => $this->formatValidationErrors($errors)], Response::HTTP_BAD_REQUEST);
         }
 
         $user = $userRepository->getByEmail($loginDto->email);
         if (is_null($user) || !$passwordHasher->isPasswordValid($user, $loginDto->password)) {
-            return $this->json(['errors' => 'Credenciais inválidas.'], Response::HTTP_UNAUTHORIZED);
+            return $this->json(['status' => false, 'message' => 'Credenciais inválidas.'], Response::HTTP_UNAUTHORIZED);
         }
 
         $token = $jwtManager->create($user);
 
-        return $this->json(compact('token'), Response::HTTP_OK);
+        return $this->json(['status' => true, ...compact('token')], Response::HTTP_OK);
     }
 }

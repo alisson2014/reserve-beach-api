@@ -38,11 +38,11 @@ class RegisterController extends AbstractController
 
         $errors = $validator->validate($registerDto);
         if (count($errors) > 0) {
-            return $this->json(['errors' => $this->formatValidationErrors($errors)], Response::HTTP_BAD_REQUEST);
+            return $this->json(['status' => false, 'errors' => $this->formatValidationErrors($errors)], Response::HTTP_BAD_REQUEST);
         }
 
         if ($userRepository->getByEmail($data['email'])) {
-            return $this->json(['errors' => 'Email já cadastrado.'], Response::HTTP_CONFLICT);
+            return $this->json(['status' => false, 'message' => 'Email já cadastrado.'], Response::HTTP_CONFLICT);
         }
 
         $user = User::getFromRegisterDto($registerDto);
@@ -54,11 +54,12 @@ class RegisterController extends AbstractController
         try {
             $userRepository->add($user, true);
         } catch (\Exception $ex) {
-            return $this->json(['error' => 'Erro ao cadastrar administrador.' . $ex->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->json(['status' => false, 'message' => 'Erro ao cadastrar administrador.' . $ex->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         return $this->json(
             [
+                'status' => true,
                 'message' => "Administrador {$user->getName()} cadastrado com sucesso!",
                 'data' => $user->toArray(),
             ], 
