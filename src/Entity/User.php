@@ -7,7 +7,7 @@ namespace App\Entity;
 use App\Dto\RegisterDto;
 use App\Enum\UserStatus;
 use App\Interface\Arrayable;
-use DateTimeImmutable;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Override;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -44,21 +44,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Arrayab
     #[ORM\Column(type: "string", length: 11, nullable: true, unique: true)]
     private ?string $cpf = null;
 
-    #[ORM\Column(type: "date_immutable", nullable: true)]
-    private ?DateTimeImmutable $birthDate = null;
+    #[ORM\Column(type: "date", nullable: true)]
+    private ?DateTime $birthDate = null;
 
-    #[ORM\Column(type: "datetime_immutable")]
-    private DateTimeImmutable $createdAt;
+    #[ORM\Column(type: "datetime")]
+    private DateTime $createdAt;
 
-    #[ORM\Column(type: "datetime_immutable", nullable: true)]
-    private ?DateTimeImmutable $updatedAt = null;
+    #[ORM\Column(type: "datetime", nullable: true)]
+    private ?DateTime $updatedAt = null;
 
     #[ORM\Column(type: "json")]
     private array $roles = ['ROLE_USER'];
 
     public function __construct()
     {
-        $this->createdAt = new DateTimeImmutable();
+        $this->createdAt = new DateTime();
     }
 
     public static function getFromRegisterDto(RegisterDto $registerDto): self
@@ -73,7 +73,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Arrayab
     #[ORM\PreUpdate]
     public function onPreUpdate(): void
     {
-        $this->updatedAt = new DateTimeImmutable();
+        $this->updatedAt = new DateTime();
     }
 
     public function getRoles(): array
@@ -136,17 +136,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Arrayab
         return $this->cpf;
     }
 
-    public function getCreatedAt(): DateTimeImmutable 
+    public function getCreatedAt(): DateTime 
     {
         return $this->createdAt;
     }
     
-    public function getUpdatedAt(): ?DateTimeImmutable 
+    public function getUpdatedAt(): ?DateTime 
     {
         return $this->updatedAt;
     }
 
-    public function getBirthDate(): ?DateTimeImmutable 
+    public function getBirthDate(): ?DateTime 
     {
         return $this->birthDate;
     }
@@ -193,7 +193,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Arrayab
         return $this;
     }
 
-    public function setBirthDate(?DateTimeImmutable $birthDate): self 
+    public function setBirthDate(?DateTime $birthDate): self 
     {
         $this->birthDate = $birthDate;
         return $this;

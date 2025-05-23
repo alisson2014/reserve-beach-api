@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Interface\Arrayable;
-use DateTimeImmutable;
+use DateTime;
 use Override;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -31,28 +31,28 @@ class Court implements Arrayable
     #[ORM\Column(type: "smallint")]
     private int $capacity;
 
-    #[ORM\Column(type: "string", length: 1, options: ["fixed" => true])]
-    private string $status;
+    #[ORM\Column(type: "boolean")]
+    private bool $active = true;
 
     #[ORM\ManyToOne(targetEntity: CourtType::class)]
     #[ORM\JoinColumn(name: "court_type_id", referencedColumnName: "id", nullable: false)]
     private CourtType $courtType;
 
-    #[ORM\Column(type: "datetime_immutable")]
-    private DateTimeImmutable $createdAt;
+    #[ORM\Column(type: "datetime")]
+    private DateTime $createdAt;
 
-    #[ORM\Column(type: "datetime_immutable", nullable: true)]
-    private ?DateTimeImmutable $updatedAt = null;
+    #[ORM\Column(type: "datetime", nullable: true)]
+    private ?DateTime $updatedAt = null;
 
     public function __construct()
     {
-        $this->createdAt = new DateTimeImmutable();
+        $this->createdAt = new DateTime();
     }
 
     #[ORM\PreUpdate]
     public function onPreUpdate(): void
     {
-        $this->updatedAt = new DateTimeImmutable();
+        $this->updatedAt = new DateTime();
     }
 
     public function getId(): ?int
@@ -80,9 +80,9 @@ class Court implements Arrayable
         return $this->capacity;
     }
 
-    public function getStatus(): string
+    public function isActive(): bool
     {
-        return $this->status;
+        return $this->active;
     }
 
     public function getCourtType(): CourtType
@@ -90,12 +90,12 @@ class Court implements Arrayable
         return $this->courtType;
     }
 
-    public function getCreatedAt(): DateTimeImmutable
+    public function getCreatedAt(): DateTime
     {
         return $this->createdAt;
     }   
 
-    public function getUpdatedAt(): ?DateTimeImmutable
+    public function getUpdatedAt(): ?DateTime
     {
         return $this->updatedAt;
     }
@@ -124,9 +124,9 @@ class Court implements Arrayable
         return $this;
     }
 
-    public function setStatus(string $status): self
+    public function setActive(bool $active): self
     {
-        $this->status = $status;
+        $this->active = $active;
         return $this;
     }
 
@@ -151,7 +151,7 @@ class Court implements Arrayable
             'description' => $this->description,
             'schedulingFee' => $this->schedulingFee,
             'capacity' => $this->capacity,
-            'status' => $this->status,
+            'active' => $this->active,
             'courtType' => $this->courtType->toArray(),
             'createdAt' => $this->createdAt,
             'updatedAt' => $this->updatedAt,

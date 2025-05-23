@@ -30,6 +30,15 @@ class CourtRepository extends ServiceEntityRepository implements ICourtRepositor
         return $this->findAll();
     }
 
+    public function getActive(): array
+    {
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.status = :active')
+            ->setParameter('active', 's')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function getById(int $id): ?Court
     {
         return $this->find($id);

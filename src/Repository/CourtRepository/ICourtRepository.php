@@ -10,6 +10,8 @@ interface ICourtRepository
 {
     public function getAll(): array;
 
+    public function getActive(): array;
+
     public function getById(int $id): ?Court;
 
     public function add(Court $court): Court;
