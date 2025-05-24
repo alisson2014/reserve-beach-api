@@ -8,6 +8,7 @@ use App\Dto\CourtTypeDto;
 use App\Entity\CourtType;
 use App\Repository\CourtTypeRepository\ICourtTypeRepository;
 use App\Utils\ResponseUtils;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\{Request, JsonResponse, Response};
@@ -18,7 +19,7 @@ class CourtTypeController extends AbstractController
 {
     use ResponseUtils;
 
-    const NOT_FOUND_MESSAGE = 'Tipo de quadra não encontrado.';
+    public const NOT_FOUND_MESSAGE = 'Tipo de quadra não encontrado.';
 
     private ICourtTypeRepository $courtTypeRepository;
 
@@ -43,7 +44,7 @@ class CourtTypeController extends AbstractController
             );
         }
 
-        return $this->json(['status' => true, 'data' => $courtTypes]);
+        return $this->ok($courtTypes);
     }
 
     #[Route('/api/court_types/{id}', name: 'court_types_show', methods: ['GET'],  requirements: ['id' => '\d+'])]
@@ -55,7 +56,7 @@ class CourtTypeController extends AbstractController
             return $this->notFoundResource(self::NOT_FOUND_MESSAGE);
         }
 
-        return $this->json(['status' => true, 'data' => $courtType->toArray()]);
+        return $this->ok($courtType->toArray());
     }
 
     #[Route('/api/court_types', name: 'court_types_create', methods: ['POST'])]
@@ -74,14 +75,13 @@ class CourtTypeController extends AbstractController
 
         try {
             $this->courtTypeRepository->add($courtType, true);
-        } catch (\Exception $ex) {
-            return $this->json([
-                'status' => false,
-                'message' => 'Erro ao cadastrar tipo de quadra' . $ex->getMessage(),
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        } catch (UniqueConstraintViolationException $ex) {
+            return $this->conflict('Já existe um tipo de quadra com esse nome.');
+        }  catch (\Exception $ex) {
+            return $this->internalServerError('Erro ao cadastrar tipo de quadra: ' . $ex->getMessage());
         }
 
-        return $this->json(['status' => true, 'data' => $courtType->toArray()], Response::HTTP_CREATED);
+        return $this->created($courtType->toArray(), 'Tipo de quadra cadastrado com sucesso!');
     }
 
     #[Route('/api/court_types/{id}', name: 'court_type_update', methods: ['PUT'], requirements: ['id' => '\d+'])]
@@ -101,18 +101,17 @@ class CourtTypeController extends AbstractController
             return $this->notFoundResource(self::NOT_FOUND_MESSAGE);
         }
 
-        $courtType->setName($courtTypeDto->name);
+        $courtType = CourtType::get($courtTypeDto, $courtType); 
 
         try {
             $courtType = $this->courtTypeRepository->update($courtType, true);
+        } catch (UniqueConstraintViolationException $ex) {
+            return $this->conflict('Já existe um tipo de quadra com esse nome.');
         } catch (\Exception $ex) {
-            return $this->json([
-                'status' => false,
-                'message' => 'Erro ao atualizar tipo de quadra' . $ex->getMessage(),
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->internalServerError('Erro ao atualizar tipo de quadra: ' . $ex->getMessage());  
         }
 
-        return $this->json(['status' => true, 'data' => $courtType->toArray()]);
+        return $this->ok($courtType->toArray(), 'Tipo de quadra atualizado com sucesso!');
     }
 
     #[Route('/api/court_types/{id}', name: 'court_type_delete', methods: ['DELETE'],  requirements: ['id' => '\d+'])]
@@ -128,12 +127,9 @@ class CourtTypeController extends AbstractController
         try {
             $this->courtTypeRepository->remove($courtType, true);
         } catch (\Exception $ex) {
-            return $this->json([
-                'status' => false,
-                'message' => 'Erro ao remover tipo de quadra' . $ex->getMessage(),
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->internalServerError('Erro ao remover tipo de quadra: ' . $ex->getMessage());
         }
 
-        return $this->json(null, Response::HTTP_NO_CONTENT);
+        return $this->noContent();
     }
 }

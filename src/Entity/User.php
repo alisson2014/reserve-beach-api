@@ -61,9 +61,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Arrayab
         $this->createdAt = new DateTime();
     }
 
-    public static function getFromRegisterDto(RegisterDto $registerDto): self
+    public static function get(RegisterDto $registerDto, ?self $user = null): self
     {
-        $user = new self();
+        if(is_null($user)) {
+            $user = new self();
+        }
+        
         $user->setName($registerDto->name);
         $user->setLastName($registerDto->lastName);
         $user->setEmail($registerDto->email);

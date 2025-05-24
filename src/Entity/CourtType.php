@@ -38,9 +38,12 @@ class CourtType implements Arrayable
         $this->createdAt = new DateTime();
     }
 
-    public static function get(CourtTypeDto $courtTypeDto): self
+    public static function get(CourtTypeDto $courtTypeDto, ?self $courtType = null): self
     {
-        $courtType = new self();
+        if(is_null($courtType)) {
+            $courtType = new self();
+        }
+        
         $courtType->setName($courtTypeDto->name);
         return $courtType;
     }

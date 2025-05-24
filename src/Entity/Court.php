@@ -50,9 +50,12 @@ class Court implements Arrayable
         $this->createdAt = new DateTime();
     }
 
-    public static function get(CourtDto $courtDto, CourtType $courtType): self
+    public static function get(CourtDto $courtDto, CourtType $courtType, ?self $court = null): self
     {
-        $court = new self();
+        if(is_null($court)) {
+            $court = new self();
+        }
+
         $court->name = $courtDto->name;
         $court->description = $courtDto->description;
         $court->schedulingFee = $courtDto->schedulingFee;

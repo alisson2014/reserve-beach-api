@@ -7,8 +7,8 @@ namespace App\Controller\Admin;
 use App\Dto\RegisterDto;
 use App\Entity\User;
 use App\Repository\UserRepository\IUserRepository;
-use App\Utils\ValidationErrorFormatterTrait;
-use Symfony\Component\HttpFoundation\{Request, JsonResponse, Response};
+use App\Utils\ResponseUtils;
+use Symfony\Component\HttpFoundation\{Request, JsonResponse};
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,7 +17,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class RegisterController extends AbstractController
 {
-    use ValidationErrorFormatterTrait;
+    use ResponseUtils;
 
     #[Route('/api/admin/register', name: 'admin_register', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
@@ -31,16 +31,15 @@ class RegisterController extends AbstractController
 
         $registerDto = RegisterDto::fromArray($data);
 
-        $errors = $validator->validate($registerDto);
-        if (count($errors) > 0) {
-            return $this->json(['status' => false, 'errors' => $this->formatValidationErrors($errors)], Response::HTTP_BAD_REQUEST);
+        if (count($errors = $validator->validate($registerDto)) > 0) {
+            return $this->badRequest($errors);
         }
 
         if ($userRepository->getByEmail($data['email'])) {
-            return $this->json(['status' => false, 'message' => 'Email já cadastrado.'], Response::HTTP_CONFLICT);
+            return $this->conflict('Email já cadastrado.');
         }
 
-        $user = User::getFromRegisterDto($registerDto);
+        $user = User::get($registerDto);
         $user->setPassword(
             $passwordHasher->hashPassword($user, $data['password'])
         );
@@ -49,16 +48,9 @@ class RegisterController extends AbstractController
         try {
             $userRepository->add($user, true);
         } catch (\Exception $ex) {
-            return $this->json(['status' => false, 'message' => 'Erro ao cadastrar administrador.' . $ex->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->internalServerError('Erro ao cadastrar administrador: ' . $ex->getMessage());
         }
 
-        return $this->json(
-            [
-                'status' => true,
-                'message' => "Administrador {$user->getName()} cadastrado com sucesso!",
-                'data' => $user->toArray(),
-            ], 
-            Response::HTTP_CREATED
-        );
+        return $this->created($user->toArray(), "Administrador {$user->getName()} cadastrado com sucesso!");
     }
 }

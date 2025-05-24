@@ -8,7 +8,8 @@ use App\Dto\CourtDto;
 use App\Entity\Court;
 use App\Repository\CourtRepository\ICourtRepository;
 use App\Repository\CourtTypeRepository\ICourtTypeRepository;
-use App\Utils\ValidationErrorFormatterTrait;
+use App\Utils\ResponseUtils;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\{Request, JsonResponse, Response};
 use Symfony\Component\Routing\Annotation\Route;
@@ -17,7 +18,9 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class CourtController extends AbstractController
 {
-    use ValidationErrorFormatterTrait;
+    use ResponseUtils;
+
+    public const NOT_FOUND_MESSAGE = 'Quadra não encontrada.';
 
     private ICourtRepository $courtRepository;
 
@@ -42,7 +45,7 @@ class CourtController extends AbstractController
             $this->courtRepository->getActive($name, $courtType)
         );
 
-        return $this->json(['status' => true, 'data' => $courts]);
+        return $this->ok($courts);
     }
 
     #[Route('/api/courts/{id}', name: 'courts_show', methods: ['GET'],  requirements: ['id' => '\d+'])]
@@ -51,10 +54,10 @@ class CourtController extends AbstractController
         $court = $this->courtRepository->getById($id);
 
         if (is_null($court)) {
-            return $this->json(['status' => true, 'message' => 'Quadra não encontrada.'], Response::HTTP_NOT_FOUND);
+            return $this->notFoundResource(self::NOT_FOUND_MESSAGE);
         }
 
-        return $this->json(['status' => true, 'data' => $court->toArray()]);
+        return $this->ok($court->toArray());
     }
 
     #[Route('/api/courts', name: 'court_create', methods: ['POST'])]
@@ -65,28 +68,26 @@ class CourtController extends AbstractController
 
         $courtDto = CourtDto::fromArray($data);
 
-        $errors = $validator->validate($courtDto);
-        if (count($errors) > 0) {
-            return $this->json(['status' => false, 'errors' => $this->formatValidationErrors($errors)], Response::HTTP_BAD_REQUEST);
+        if (count($errors = $validator->validate($courtDto)) > 0) {
+            return $this->badRequest($errors);
         }
 
         $courtType = $this->courtTypeRepository->getById($courtDto->courtTypeId);
         if (is_null($courtType)) {
-            return $this->json(['status' => false, 'message' => 'Quadra não encontrado.'], Response::HTTP_NOT_FOUND);
+            return $this->notFoundResource(CourtTypeController::NOT_FOUND_MESSAGE);
         }
 
         $court = Court::get($courtDto, $courtType);
 
         try {
             $this->courtRepository->add($court, true);
+        } catch (UniqueConstraintViolationException $ex) {
+            return $this->conflict('Já existe uma quadra com esse nome.');
         } catch (\Exception $ex) {
-            return $this->json([
-                'status' => false,
-                'message' => 'Erro ao cadastrar quadra' . $ex->getMessage(),
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->internalServerError('Erro ao cadastrar quadra: ' . $ex->getMessage());
         }
 
-        return $this->json(['status' => true, 'data' => $court->toArray()], Response::HTTP_CREATED);
+        return $this->created($court->toArray(), 'Quadra cadastrada com sucesso.');
     }
 
     #[Route('/api/courts/{id}', name: 'court_update', methods: ['PUT'], requirements: ['id' => '\d+'])]
@@ -97,69 +98,66 @@ class CourtController extends AbstractController
 
         $courtDto = CourtDto::fromArray($data);
 
-        $errors = $validator->validate($courtDto);
-        if (count($errors) > 0) {
-            return $this->json(['status' => false, 'errors' => $this->formatValidationErrors($errors)], Response::HTTP_BAD_REQUEST);
+        if (count($errors = $validator->validate($courtDto)) > 0) {
+            return $this->badRequest($errors);
         }
 
         $courtType = $this->courtTypeRepository->getById($courtDto->courtTypeId);
         if (is_null($courtType)) {
-            return $this->json(['status' => false, 'message' => 'Tipo de quadra não encontrado.'], Response::HTTP_NOT_FOUND);
+            return $this->notFoundResource(CourtTypeController::NOT_FOUND_MESSAGE);
         }
 
         $court = $this->courtRepository->getById($id);
 
         if (is_null($court)) {
-            return $this->json(['status' => false, 'message' => 'Quadra não encontrado.'], Response::HTTP_NOT_FOUND);
+            return $this->notFoundResource(self::NOT_FOUND_MESSAGE);
         }
 
-        $court->setName($courtDto->name);
-        $court->setDescription($courtDto->description);
-        $court->setSchedulingFee($courtDto->schedulingFee);
-        $court->setCapacity($courtDto->capacity);
-        $court->setActive($courtDto->active);
-        $court->setCourtType($courtType);
+        $court = Court::get($courtDto, $courtType, $court);
 
         try {
             $court = $this->courtRepository->update($court, true);
+        } catch (UniqueConstraintViolationException $ex) {
+            return $this->conflict('Já existe uma quadra com esse nome.');
         } catch (\Exception $ex) {
-            return $this->json([
-                'status' => false,
-                'message' => 'Erro ao atualizar quadra' . $ex->getMessage(),
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->internalServerError('Erro ao atualizar quadra: ' . $ex->getMessage());
         }
 
-        return $this->json(['status' => true, 'data' => $court->toArray()]);
+        return $this->ok($court->toArray(), 'Quadra atualizada com sucesso.');
     }
 
     #[Route('/api/courts/{id}/active', name: 'court_set_active', methods: ['PATCH'], requirements: ['id' => '\d+'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function setActive(int $id, Request $request): JsonResponse 
+    public function active(int $id, Request $request): JsonResponse 
     {
         $data = json_decode($request->getContent(), true);
 
         $active = $data['active'] ?? null;
 
         if (!is_bool($active)) {
-            return $this->json(['status' => false, 'message' => 'Campo ativo deve ser verdadeiro ou falso.'], Response::HTTP_BAD_REQUEST);
+            return $this->json([
+                'status' => false, 
+                'errors' => [
+                    'active' => ['Campo ativo deve ser um booleano.']
+                ]
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         $court = $this->courtRepository->getById($id);
 
         if (is_null($court)) {
-            return $this->json(['status' => false, 'message' => 'Quadra não encontrada.'], Response::HTTP_NOT_FOUND);
+            return $this->notFoundResource(self::NOT_FOUND_MESSAGE);
         }
 
         try {
             $court = $this->courtRepository->setActive($court, $active, true);
         } catch (\Exception $ex) {
-            return $this->json([
-                'status' => false,
-                'message' => 'Erro ao atualizar quadra' . $ex->getMessage(),
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->internalServerError('Erro ao atualizar quadra: ' . $ex->getMessage());
         }
 
-        return $this->json(['status' => true, 'data' => $court->toArray()]);
+        $newStatus = $active ? 'ativada' : 'desativada';
+
+        return $this->ok($court->toArray(), sprintf('Quadra %s com sucesso.', $newStatus));
     }
 
     #[Route('/api/courts/{id}', name: 'court_delete', methods: ['DELETE'],  requirements: ['id' => '\d+'])]
@@ -169,18 +167,15 @@ class CourtController extends AbstractController
         $court = $this->courtRepository->getById($id);
 
         if (is_null($court)) {
-            return $this->json(['status' => false, 'message' => 'Quadra não encontrado.'], Response::HTTP_NOT_FOUND);
+            return $this->notFoundResource(self::NOT_FOUND_MESSAGE);
         }
 
         try {
             $this->courtRepository->remove($court, true);
         } catch (\Exception $ex) {
-            return $this->json([
-                'status' => false,
-                'message' => 'Erro ao remover quadra' . $ex->getMessage(),
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->internalServerError('Erro ao remover quadra: ' . $ex->getMessage());
         }
 
-        return $this->json(null, Response::HTTP_NO_CONTENT);
+        return $this->noContent();
     }
 }

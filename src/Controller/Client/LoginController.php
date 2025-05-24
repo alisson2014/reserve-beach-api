@@ -6,7 +6,7 @@ namespace App\Controller\Client;
 
 use App\Dto\LoginDto;
 use App\Repository\UserRepository\IUserRepository;
-use App\Utils\ValidationErrorFormatterTrait;
+use App\Utils\ResponseUtils;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\{Request, JsonResponse, Response};
 
 class LoginController extends AbstractController 
 {
-    use ValidationErrorFormatterTrait;
+    use ResponseUtils;
 
     #[Route('/api/user/login', name: 'user_login', methods: ['POST'])]
     public function index(
@@ -30,18 +30,15 @@ class LoginController extends AbstractController
 
         $loginDto = LoginDto::fromArray($data);
 
-        $errors = $validator->validate($loginDto);
-        if (count($errors) > 0) {
-            return $this->json(['status' => false, 'errors' => $this->formatValidationErrors($errors)], Response::HTTP_BAD_REQUEST);
+        if (count($errors = $validator->validate($loginDto)) > 0) {
+            return $this->badRequest($errors);
         }
 
         $user = $userRepository->getByEmail($loginDto->email);
         if (is_null($user) || !$passwordHasher->isPasswordValid($user, $loginDto->password)) {
-            return $this->json(['status' => false, 'message' => 'Credenciais inválidas.'], Response::HTTP_UNAUTHORIZED);
+            return $this->unauthorized('Credenciais inválidas.');
         }
 
-        $token = $jwtManager->create($user);
-
-        return $this->json(['status' => true, ...compact('token')], Response::HTTP_OK);
+        return $this->ok($jwtManager->create($user), 'Login realizado com sucesso.');
     }
 }
