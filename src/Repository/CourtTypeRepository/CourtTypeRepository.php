@@ -68,9 +68,9 @@ class CourtTypeRepository extends ServiceEntityRepository implements ICourtTypeR
         return $courtType;
     }
 
-    public function remove(CourtType $entity, bool $flush = false): void
+    public function remove(CourtType $courtType, bool $flush = false): void
     {
-        $this->getEntityManager()->remove($entity);
+        $this->getEntityManager()->remove($courtType);
 
         if (!$flush) return;
 

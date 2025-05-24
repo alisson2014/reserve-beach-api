@@ -27,6 +27,8 @@ services:
         alias: App\Repository\CourtTypeRepository\CourtTypeRepository
     App\Repository\CourtRepository\ICourtRepository:
         alias: App\Repository\CourtRepository\CourtRepository
+    App\Repository\CourtRepository\ICourtScheduleRepository:
+        alias: App\Repository\CourtRepository\CourtScheduleRepository
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
