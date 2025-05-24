@@ -10,8 +10,8 @@ use App\Interface\Arrayable;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Override;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\{UserInterface, PasswordAuthenticatedUserInterface};
+use Doctrine\DBAL\Types\Types;
 
 #[ORM\Entity]
 #[ORM\Table(name: "users")]
@@ -20,40 +20,40 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Arrayab
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: "integer")]
+    #[ORM\Column(type: Types::INTEGER)]
     private ?int $id = null;
 
-    #[ORM\Column(type: "string", length: 50)]
+    #[ORM\Column(type: Types::STRING, length: 50)]
     private string $name;
 
-    #[ORM\Column(type: "string", length: 150)]
+    #[ORM\Column(type: Types::STRING, length: 150)]
     private string $lastName;
 
-    #[ORM\Column(type: "string", length: 254, unique: true)]
+    #[ORM\Column(type: Types::STRING, length: 254, unique: true)]
     private string $email;
 
-    #[ORM\Column(type: "string", length: 255)]
+    #[ORM\Column(type: Types::STRING, length: 255)]
     private string $password;
 
     #[ORM\Column(enumType: UserStatus::class, length: 1, options: ["fixed" => true])] 
     private UserStatus $status = UserStatus::ACTIVE;
 
-    #[ORM\Column(type: "string", length: 11, nullable: true)]
+    #[ORM\Column(type: Types::STRING, length: 11, nullable: true)]
     private ?string $phone = null;
 
-    #[ORM\Column(type: "string", length: 11, nullable: true, unique: true)]
+    #[ORM\Column(type: Types::STRING, length: 11, nullable: true, unique: true)]
     private ?string $cpf = null;
 
-    #[ORM\Column(type: "date", nullable: true)]
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?DateTime $birthDate = null;
 
-    #[ORM\Column(type: "datetime")]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private DateTime $createdAt;
 
-    #[ORM\Column(type: "datetime", nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?DateTime $updatedAt = null;
 
-    #[ORM\Column(type: "json")]
+    #[ORM\Column(type: Types::JSON)]
     private array $roles = ['ROLE_USER'];
 
     public function __construct()

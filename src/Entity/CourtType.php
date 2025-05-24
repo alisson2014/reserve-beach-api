@@ -8,8 +8,9 @@ use App\Dto\CourtTypeDto;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use App\Interface\Arrayable;
-use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\{ArrayCollection, Collection};
 use Override;
+use Doctrine\DBAL\Types\Types;
 
 #[ORM\Entity]
 #[ORM\Table(name: "court_types")]
@@ -18,16 +19,16 @@ class CourtType implements Arrayable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: "integer")]
+    #[ORM\Column(type: Types::INTEGER)]
     private ?int $id = null;
     
-    #[ORM\Column(type: "string", length: 100, unique: true)]
+    #[ORM\Column(type: Types::STRING, length: 100, unique: true)]
     private string $name;
 
-    #[ORM\Column(type: "datetime")]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private DateTime $createdAt;
 
-    #[ORM\Column(type: "datetime", nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?DateTime $updatedAt = null;
 
     #[ORM\OneToMany(mappedBy: "courtType", targetEntity: Court::class)]
@@ -36,6 +37,7 @@ class CourtType implements Arrayable
     public function __construct()
     {
         $this->createdAt = new DateTime();
+        $this->courts = new ArrayCollection();
     }
 
     public static function get(CourtTypeDto $courtTypeDto, ?self $courtType = null): self

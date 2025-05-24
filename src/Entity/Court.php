@@ -7,6 +7,8 @@ namespace App\Entity;
 use App\Dto\CourtDto;
 use App\Interface\Arrayable;
 use DateTime;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Override;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -35,7 +37,7 @@ class Court implements Arrayable
     #[ORM\Column(type: "boolean")]
     private bool $active = true;
 
-    #[ORM\ManyToOne(targetEntity: CourtType::class)]
+    #[ORM\ManyToOne(targetEntity: CourtType::class, inversedBy: 'courts')]
     #[ORM\JoinColumn(name: "court_type_id", referencedColumnName: "id", nullable: false)]
     private CourtType $courtType;
 
@@ -45,9 +47,45 @@ class Court implements Arrayable
     #[ORM\Column(type: "datetime", nullable: true)]
     private ?DateTime $updatedAt = null;
 
+    /**
+     * Coleção de todos os horários de funcionamento desta quadra.
+     */
+    #[ORM\OneToMany(targetEntity: CourtSchedule::class, mappedBy: 'court', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $schedules;
+
     public function __construct()
     {
         $this->createdAt = new DateTime();
+        $this->schedules = new ArrayCollection();
+    }
+
+    /**
+     * @return Collection<int, CourtSchedule>
+     */
+    public function getSchedules(): Collection
+    {
+        return $this->schedules;
+    }
+
+    public function addSchedule(CourtSchedule $schedule): static
+    {
+        if (!$this->schedules->contains($schedule)) {
+            $this->schedules->add($schedule);
+            $schedule->setCourt($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSchedule(CourtSchedule $schedule): static
+    {
+        if ($this->schedules->removeElement($schedule)) {
+            if ($schedule->getCourt() === $this) {
+                $schedule->setCourt(null);
+            }
+        }
+
+        return $this;
     }
 
     public static function get(CourtDto $courtDto, CourtType $courtType, ?self $court = null): self
