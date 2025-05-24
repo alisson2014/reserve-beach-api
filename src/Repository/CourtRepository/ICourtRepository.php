@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository\CourtRepository;
 
-use App\Entity\Court;
-use App\Entity\CourtType;
+use App\Entity\{Court, CourtType};
 
 interface ICourtRepository
 {
@@ -15,9 +14,11 @@ interface ICourtRepository
 
     public function getById(int $id): ?Court;
 
-    public function add(Court $court): Court;
+    public function add(Court $court, bool $flush = false): Court;
 
-    public function update(Court $court): Court;
+    public function update(Court $court, bool $flush = false): Court;
 
-    public function remove(Court $court): void;
+    public function setActive(Court $court, bool $active, bool $flush = false): Court;
+
+    public function remove(Court $court, bool $flush = false): void;
 }

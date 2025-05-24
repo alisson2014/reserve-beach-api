@@ -63,13 +63,7 @@ class CourtController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        $courtDto = new CourtDto();
-        $courtDto->name = $data['name'] ?? null;
-        $courtDto->description = $data['description'] ?? null;
-        $courtDto->schedulingFee = $data['schedulingFee'] ?? null;
-        $courtDto->capacity = $data['capacity'] ?? null;
-        $courtDto->active = $data['active'] ?? true;
-        $courtDto->courtTypeId = isset($data['courtTypeId']) && !empty($data['courtTypeId']) ? (int)$data['courtTypeId'] : null;
+        $courtDto = CourtDto::fromArray($data);
 
         $errors = $validator->validate($courtDto);
         if (count($errors) > 0) {
@@ -101,13 +95,7 @@ class CourtController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        $courtDto = new CourtDto();
-        $courtDto->name = $data['name'] ?? null;
-        $courtDto->description = $data['description'] ?? null;
-        $courtDto->schedulingFee = $data['schedulingFee'] ?? null;
-        $courtDto->capacity = $data['capacity'] ?? null;
-        $courtDto->active = $data['active'] ?? true;
-        $courtDto->courtTypeId = isset($data['courtTypeId']) && !empty($data['courtTypeId']) ? (int)$data['courtTypeId'] : null;
+        $courtDto = CourtDto::fromArray($data);
 
         $errors = $validator->validate($courtDto);
         if (count($errors) > 0) {
@@ -134,6 +122,36 @@ class CourtController extends AbstractController
 
         try {
             $court = $this->courtRepository->update($court, true);
+        } catch (\Exception $ex) {
+            return $this->json([
+                'status' => false,
+                'message' => 'Erro ao atualizar quadra' . $ex->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        return $this->json(['status' => true, 'data' => $court->toArray()]);
+    }
+
+    #[Route('/api/courts/{id}/active', name: 'court_set_active', methods: ['PATCH'], requirements: ['id' => '\d+'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function setActive(int $id, Request $request): JsonResponse 
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $active = $data['active'] ?? null;
+
+        if (!is_bool($active)) {
+            return $this->json(['status' => false, 'message' => 'Campo ativo deve ser verdadeiro ou falso.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $court = $this->courtRepository->getById($id);
+
+        if (is_null($court)) {
+            return $this->json(['status' => false, 'message' => 'Quadra não encontrada.'], Response::HTTP_NOT_FOUND);
+        }
+
+        try {
+            $court = $this->courtRepository->setActive($court, $active, true);
         } catch (\Exception $ex) {
             return $this->json([
                 'status' => false,

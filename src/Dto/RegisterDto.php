@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Dto;
 
+use App\Interface\Arrayable;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Validator as AppAssert;
 
 #[AppAssert\PasswordMatch]
-final class RegisterDto
+final class RegisterDto implements Dto, Arrayable
 {
     #[Assert\NotBlank(message: "Nome é obrigatório.")]
     #[Assert\Length(
@@ -49,4 +50,40 @@ final class RegisterDto
 
     #[Assert\NotBlank(message: "Confirmação de senha é obrigatória.")]
     public ?string $confirmPassword = null;
+
+    public function __construct(
+        ?string $name = null,
+        ?string $lastName = null,
+        ?string $email = null,
+        ?string $password = null,
+        ?string $confirmPassword = null
+    ) {
+        $this->name = $name;
+        $this->lastName = $lastName;
+        $this->email = $email;
+        $this->password = $password;
+        $this->confirmPassword = $confirmPassword;
+    }
+
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            $data['name'] ?? null,
+            $data['lastName'] ?? null,
+            $data['email'] ?? null,
+            $data['password'] ?? null,
+            $data['confirmPassword'] ?? null
+        );
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'name' => $this->name,
+            'lastName' => $this->lastName,
+            'email' => $this->email,
+            'password' => $this->password,
+            'confirmPassword' => $this->confirmPassword,
+        ];
+    }
 }

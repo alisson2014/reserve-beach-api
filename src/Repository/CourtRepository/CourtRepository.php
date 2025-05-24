@@ -15,6 +15,7 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Court|null getById(int $id)
  * @method Court add(Court $court, bool $flush = false): Court
  * @method Court update(Court $court, bool $flush = false): Court
+ * @method Court setActive(Court $court, bool $active, bool $flush = false): Court
  * @method void remove(Court $entity, bool $flush = false): void
  * @method array getAll(): Court[]
  * @method array getByNameLike(): Court[]
@@ -70,6 +71,18 @@ class CourtRepository extends ServiceEntityRepository implements ICourtRepositor
 
     public function update(Court $court, bool $flush = false): Court
     {
+        $this->getEntityManager()->persist($court);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+
+        return $court;
+    }
+
+    public function setActive(Court $court, bool $active, bool $flush = false): Court
+    {
+        $court->setActive($active);
         $this->getEntityManager()->persist($court);
 
         if ($flush) {

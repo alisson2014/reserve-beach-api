@@ -27,12 +27,7 @@ class RegisterController extends AbstractController
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
 
-        $registerDto = new RegisterDto();
-        $registerDto->name = $data['name'] ?? null;
-        $registerDto->lastName = $data['lastName'] ?? null;
-        $registerDto->email = $data['email'] ?? null;
-        $registerDto->password = $data['password'] ?? null;
-        $registerDto->confirmPassword = $data['confirmPassword'] ?? null;
+        $registerDto = RegisterDto::fromArray($data);
 
         $errors = $validator->validate($registerDto);
         if (count($errors) > 0) {

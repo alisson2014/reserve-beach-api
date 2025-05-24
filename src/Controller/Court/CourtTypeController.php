@@ -7,7 +7,7 @@ namespace App\Controller\Court;
 use App\Dto\CourtTypeDto;
 use App\Entity\CourtType;
 use App\Repository\CourtTypeRepository\ICourtTypeRepository;
-use App\Utils\ValidationErrorFormatterTrait;
+use App\Utils\ResponseUtils;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\{Request, JsonResponse, Response};
@@ -16,7 +16,9 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class CourtTypeController extends AbstractController
 {
-    use ValidationErrorFormatterTrait;
+    use ResponseUtils;
+
+    const NOT_FOUND_MESSAGE = 'Tipo de quadra não encontrado.';
 
     private ICourtTypeRepository $courtTypeRepository;
 
@@ -50,7 +52,7 @@ class CourtTypeController extends AbstractController
         $courtType = $this->courtTypeRepository->getById($id);
 
         if (is_null($courtType)) {
-            return $this->json(['status' => true, 'message' => 'Tipo de quadra não encontrado.'], Response::HTTP_NOT_FOUND);
+            return $this->notFoundResource(self::NOT_FOUND_MESSAGE);
         }
 
         return $this->json(['status' => true, 'data' => $courtType->toArray()]);
@@ -62,12 +64,10 @@ class CourtTypeController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        $courtTypeDto = new CourtTypeDto();
-        $courtTypeDto->name = $data['name'] ?? null;
+        $courtTypeDto = CourtTypeDto::fromArray($data);
 
-        $errors = $validator->validate($courtTypeDto);
-        if (count($errors) > 0) {
-            return $this->json(['status' => false, 'errors' => $this->formatValidationErrors($errors)], Response::HTTP_BAD_REQUEST);
+        if (count($errors = $validator->validate($courtTypeDto)) > 0) {
+            return $this->badRequest($errors);
         }
 
         $courtType = CourtType::get($courtTypeDto);
@@ -90,18 +90,15 @@ class CourtTypeController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        $courtTypeDto = new CourtTypeDto();
-        $courtTypeDto->name = $data['name'] ?? null;
+        $courtTypeDto = CourtTypeDto::fromArray($data);
 
-        $errors = $validator->validate($courtTypeDto);
-        if (count($errors) > 0) {
-            return $this->json(['status' => false, 'errors' => $this->formatValidationErrors($errors)], Response::HTTP_BAD_REQUEST);
+        if (count($errors = $validator->validate($courtTypeDto)) > 0) {
+            return $this->badRequest($errors);
         }
 
         $courtType = $this->courtTypeRepository->getById($id);
-
         if (is_null($courtType)) {
-            return $this->json(['status' => false, 'message' => 'Tipo de quadra não encontrado.'], Response::HTTP_NOT_FOUND);
+            return $this->notFoundResource(self::NOT_FOUND_MESSAGE);
         }
 
         $courtType->setName($courtTypeDto->name);
@@ -125,7 +122,7 @@ class CourtTypeController extends AbstractController
         $courtType = $this->courtTypeRepository->getById($id);
 
         if (is_null($courtType)) {
-            return $this->json(['status' => false, 'message' => 'Tipo de quadra não encontrado.'], Response::HTTP_NOT_FOUND);
+            return $this->notFoundResource(self::NOT_FOUND_MESSAGE);
         }
 
         try {

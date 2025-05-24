@@ -28,9 +28,7 @@ class LoginController extends AbstractController
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
 
-        $loginDto = new LoginDto();
-        $loginDto->email = $data['email'] ?? null;
-        $loginDto->password = $data['password'] ?? null;
+        $loginDto = LoginDto::fromArray($data);
 
         $errors = $validator->validate($loginDto);
         if (count($errors) > 0) {
