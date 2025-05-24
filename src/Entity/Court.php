@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Dto\CourtDto;
 use App\Interface\Arrayable;
 use DateTime;
 use Override;
@@ -22,8 +23,8 @@ class Court implements Arrayable
     #[ORM\Column(type: "string", length: 50, unique: true)]
     private string $name;
 
-    #[ORM\Column(type: "string", length: 150)]
-    private string $description;
+    #[ORM\Column(type: "string", length: 150, nullable: true)]  
+    private ?string $description = null;
 
     #[ORM\Column(type: "decimal", precision: 10, scale: 2)]
     private float $schedulingFee;
@@ -49,6 +50,19 @@ class Court implements Arrayable
         $this->createdAt = new DateTime();
     }
 
+    public static function get(CourtDto $courtDto, CourtType $courtType): self
+    {
+        $court = new self();
+        $court->name = $courtDto->name;
+        $court->description = $courtDto->description;
+        $court->schedulingFee = $courtDto->schedulingFee;
+        $court->capacity = $courtDto->capacity;
+        $court->active = $courtDto->active;
+        $court->courtType = $courtType;
+
+        return $court;
+    }
+
     #[ORM\PreUpdate]
     public function onPreUpdate(): void
     {
@@ -65,7 +79,7 @@ class Court implements Arrayable
         return $this->name;
     }
 
-    public function getDescription(): string
+    public function getDescription(): ?string
     {
         return $this->description;
     }
@@ -106,7 +120,7 @@ class Court implements Arrayable
         return $this;
     }
 
-    public function setDescription(string $description): self
+    public function setDescription(?string $description): self
     {
         $this->description = $description;
         return $this;

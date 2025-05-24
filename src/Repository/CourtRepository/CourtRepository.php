@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository\CourtRepository;
 
 use App\Entity\Court;
+use App\Entity\CourtType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -30,13 +31,25 @@ class CourtRepository extends ServiceEntityRepository implements ICourtRepositor
         return $this->findAll();
     }
 
-    public function getActive(): array
+    public function getActive(?string $name = null, ?CourtType $courtType = null): array
     {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.status = :active')
-            ->setParameter('active', 's')
-            ->getQuery()
-            ->getResult();
+        $qb = $this->createQueryBuilder('c')
+            ->andWhere('c.active = :active')
+            ->setParameter('active', true);
+
+        if (!is_null($name)) {
+            $name = str_replace(' ', '%', $name);
+
+            $qb->andWhere('c.name LIKE :name')
+                ->setParameter('name', trim($name));
+        }
+
+        if (!is_null($courtType)) {
+            $qb->andWhere('c.courtType = :courtTypeId')
+                ->setParameter('courtTypeId', $courtType->getId());
+        }
+
+        return $qb->getQuery()->getResult();
     }
 
     public function getById(int $id): ?Court

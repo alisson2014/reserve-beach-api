@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace App\Repository\CourtRepository;
 
 use App\Entity\Court;
+use App\Entity\CourtType;
 
 interface ICourtRepository
 {
     public function getAll(): array;
 
-    public function getActive(): array;
+    public function getActive(?string $name = null, ?CourtType $courtType = null): array;
 
     public function getById(int $id): ?Court;
 
