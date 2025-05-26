@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Dto\CourtScheduleDto;
 use App\Interface\Arrayable;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
@@ -43,6 +44,19 @@ class CourtSchedule implements Arrayable
     #[ORM\ManyToOne(targetEntity: Court::class, inversedBy: 'schedules')]
     #[ORM\JoinColumn(name: 'court_id', referencedColumnName: 'id', nullable: false)]
     private ?Court $court = null;
+
+    public static function get(CourtScheduleDto $courtDto, Court $court, ?self $courtSchedule = null): self
+    {
+        if(is_null($courtSchedule)) {
+            $courtSchedule = new self();
+        }
+
+        $courtSchedule->setDayOfWeek($courtDto->dayOfWeek);
+        $courtSchedule->setStartTime($courtDto->startTime);
+        $courtSchedule->setCourt($court);
+
+        return $courtSchedule;
+    }
 
     public function getId(): ?int
     {

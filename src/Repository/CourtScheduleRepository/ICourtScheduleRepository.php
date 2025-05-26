@@ -16,4 +16,8 @@ interface ICourtScheduleRepository
     public function add(CourtSchedule $courtSchedule, bool $flush = false): CourtSchedule;
 
     public function remove(CourtSchedule $courtSchedule, bool $flush = false): void;
+
+    public function flush(): void;
+
+    public function findOneByCourtWeekdayTime(int $courtId, int $dayOfWeek, string $time): CourtSchedule|null;
 }

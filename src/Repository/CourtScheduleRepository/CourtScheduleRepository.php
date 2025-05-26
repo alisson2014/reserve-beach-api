@@ -18,7 +18,7 @@ class CourtScheduleRepository extends ServiceEntityRepository implements ICourtS
     public function getAll(?int $courtId = null): array
     {
         return $this->createQueryBuilder('cs')
-            ->where('cs.court_id = :courtId')
+            ->where('cs.court = :courtId')
             ->setParameter('courtId', $courtId)
             ->getQuery()
             ->getResult();
@@ -47,5 +47,23 @@ class CourtScheduleRepository extends ServiceEntityRepository implements ICourtS
         if (!$flush) return;
 
         $this->getEntityManager()->flush();
+    }
+
+    public function flush(): void
+    {
+        $this->getEntityManager()->flush();
+    }
+
+    public function findOneByCourtWeekdayTime(int $courtId, int $dayOfWeek, string $time): ?CourtSchedule
+    {
+        return $this->createQueryBuilder('cs')
+            ->where('cs.court = :courtId')
+            ->andWhere('cs.dayOfWeek = :dayOfWeek')
+            ->andWhere('cs.startTime = :time')
+            ->setParameter('courtId', $courtId)
+            ->setParameter('dayOfWeek', $dayOfWeek)
+            ->setParameter('time', $time)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 }
