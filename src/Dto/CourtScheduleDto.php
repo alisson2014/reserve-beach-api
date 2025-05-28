@@ -10,7 +10,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 class CourtScheduleDto implements Dto, Arrayable
 {
     #[Assert\NotBlank(message: 'O horário de início é obrigatório.')]
-    #[Assert\DateTime(message: 'O horário de início deve ser uma data e hora válida.')]
     public ?\DateTimeInterface $startTime = null;
 
     #[Assert\NotBlank(message: 'O dia da semana é obrigatório.')]

@@ -15,13 +15,20 @@ class CourtScheduleRepository extends ServiceEntityRepository implements ICourtS
         parent::__construct($registry, CourtSchedule::class);
     }
 
-    public function getAll(?int $courtId = null): array
+    public function getAll(?int $courtId = null, ?int $dayOfWeek = null): array
     {
-        return $this->createQueryBuilder('cs')
-            ->where('cs.court = :courtId')
-            ->setParameter('courtId', $courtId)
-            ->getQuery()
-            ->getResult();
+        $queryBuilder = $this->createQueryBuilder('cs');
+        if (!is_null($courtId)) {
+            $queryBuilder->where('cs.court = :courtId')
+                ->setParameter('courtId', $courtId);
+        }
+
+        if (!is_null($dayOfWeek)) {
+            $queryBuilder->andWhere('cs.dayOfWeek = :dayOfWeek')
+                ->setParameter('dayOfWeek', $dayOfWeek);
+        }
+
+        return $queryBuilder->getQuery()->getResult();
     }
 
     public function getById(int $id): ?CourtSchedule

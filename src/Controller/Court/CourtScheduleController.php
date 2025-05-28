@@ -30,9 +30,9 @@ class CourtScheduleController extends AbstractController
     }
 
     #[Route('/api/court_schedules/{id}', name: 'court_schedules', methods: ['GET'], requirements: ['id' => '\d+'])]
-    public function index(int $id): JsonResponse
+    public function index(int $id, Request $request): JsonResponse
     {
-        $schedules = $this->courtScheduleRepository->getAll($id);
+        $schedules = $this->courtScheduleRepository->getAll($id, $request->query->getInt('dayOfWeek', 0) ?: null);
 
         if (empty($schedules)) {
             return $this->notFoundResource('Nenhum horário encontrado para esta quadra.');
@@ -56,32 +56,25 @@ class CourtScheduleController extends AbstractController
             return $this->json(['status' => false, 'message' => 'O payload deve ser um array de horários.'], Response::HTTP_BAD_REQUEST);
         }
 
-        $errors = [];
         $courtSchedules = [];
 
-        foreach ($data as $index => $scheduleData) {
+        foreach ($data as $scheduleData) {
             $courtScheduleDto = CourtScheduleDto::fromArray($scheduleData);
 
             $validationErrors = $validator->validate($courtScheduleDto);
             if (count($validationErrors) > 0) {
-                $errors[$index] = $validationErrors;
-                continue;
+                return $this->badRequest($validationErrors);
             }
 
             $court = $this->courtRepository->getById($courtScheduleDto->courtId);
             if (is_null($court)) {
-                $errors[$index] = ['Quadra não encontrada para o ID informado.'];
-                continue;
+                return $this->notFoundResource("Quadra não encontrada para o ID: {$courtScheduleDto->courtId}.");
             }
 
             $courtSchedule = CourtSchedule::get($courtScheduleDto, $court);
             $courtSchedules[] = $courtSchedule;
             $this->courtScheduleRepository->add($courtSchedule, false);
         }
-
-        // if (!empty($errors)) {
-        //     return $this->json(['status' => false, 'erros' => $errors], Response::HTTP_BAD_REQUEST);
-        // }
 
         try {
             $this->courtScheduleRepository->flush(); 
@@ -100,52 +93,26 @@ class CourtScheduleController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        if (!is_array($data)) {
-            return $this->json(['status' => false, 'message' => 'O payload deve ser um array de horários para exclusão.'], Response::HTTP_BAD_REQUEST);
+        if (!is_array($data) || empty($data)) {
+            return $this->json(['status' => false, 'message' => 'O payload deve ser um array não vázio com os ids para exclusão.'], Response::HTTP_BAD_REQUEST);
         }
 
-        $errors = [];
         $deleted = 0;
+        foreach ($data as $idDelete) {
+            $courtSchedule = $this->courtScheduleRepository->getById($idDelete);
 
-        foreach ($data as $index => $deleteData) {
-            if (
-                empty($deleteData['courtId']) ||
-                empty($deleteData['weekday']) ||
-                empty($deleteData['time'])
-            ) {
-                $errors[$index] = 'courtId, weekday e time são obrigatórios.';
-                continue;
+            if (is_null($courtSchedule)) {
+                return $this->notFoundResource("Horário não encontrado para o ID: {$idDelete}.");
             }
 
-            $court = $this->courtRepository->getById($deleteData['courtId']);
-            if (is_null($court)) {
-                $errors[$index] = 'Quadra não encontrada para o ID informado.';
-                continue;
-            }
-
-            $schedule = $this->courtScheduleRepository->findOneByCourtWeekdayTime(
-                $deleteData['courtId'],
-                $deleteData['weekday'],
-                $deleteData['time']
-            );
-
-            if (!$schedule) {
-                $errors[$index] = 'Horário não encontrado para os dados informados.';
-                continue;
-            }
-
-            $this->courtScheduleRepository->remove($schedule, false);
-            $deleted++;
-        }
-
-        if (!empty($errors)) {
-            return $this->json(['status' => false, 'deleted' => $deleted, 'erros' => $errors], Response::HTTP_BAD_REQUEST);
+            $this->courtScheduleRepository->remove($courtSchedule, false);
+            $deleted++; 
         }
 
         if ($deleted > 0) {
             $this->courtScheduleRepository->flush();
         }
 
-        return $this->ok(['deleted' => $deleted], 'Horários removidos com sucesso.');
+        return $this->ok((string)$deleted, 'Horários removidos com sucesso.');
     }
 }

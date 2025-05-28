@@ -9,7 +9,7 @@ use App\Entity\CourtSchedule;
 interface ICourtScheduleRepository
 {
     /** @return CourtSchedule[] */
-    public function getAll(?int $courtId = null): array;
+    public function getAll(?int $courtId = null, ?int $dayOfWeek = null): array;
 
     public function getById(int $id): ?CourtSchedule;
 

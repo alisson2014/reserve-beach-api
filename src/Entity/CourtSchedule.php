@@ -109,7 +109,7 @@ class CourtSchedule implements Arrayable
             'id' => $this->getId(),
             'day_of_week' => $this->getDayOfWeek(),
             'start_time' => $this->getStartTime()?->format('H:i:s'),
-            'court' => $this->getCourt(),
+            'court' => $this->getCourt()->toArray(),
         ];
     }
 }
