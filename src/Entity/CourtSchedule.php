@@ -106,10 +106,10 @@ class CourtSchedule implements Arrayable
     public function toArray(): array
     {
         return [
-            'id' => $this->getId(),
-            'day_of_week' => $this->getDayOfWeek(),
-            'start_time' => $this->getStartTime()?->format('H:i:s'),
-            'court' => $this->getCourt()->toArray(),
+            'id' => $this->id,
+            'day_of_week' => $this->dayOfWeek,
+            'start_time' => $this->startTime?->format('H:i:s'),
+            'court' => $this->court->toArray(),
         ];
     }
 }

@@ -218,17 +218,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Arrayab
     public function toArray(): array
     {
         return [
-            'id' => $this->getId(),
-            'name' => $this->getName(),
-            'lastName' => $this->getLastName(),
-            'email' => $this->getEmail(),
-            'status' => $this->getStatus()->value,
-            'phone' => $this->getPhone(),
-            'cpf' => $this->getCpf(),
-            'birthDate' => $this->getBirthDate() ?: null,
-            'createdAt' => $this->getCreatedAt(),
-            'updatedAt' => $this->getUpdatedAt() ?: null,
-            'roles' => $this->getRoles()
+            'id' => $this->id,
+            'name' => $this->name,
+            'lastName' => $this->lastName,
+            'email' => $this->email,
+            'status' => $this->status->value,
+            'phone' => $this->phone,
+            'cpf' => $this->cpf,
+            'birthDate' => $this->birthDate ?: null,
+            'createdAt' => $this->createdAt,
+            'updatedAt' => $this->updatedAt ?: null,
+            'roles' => $this->roles
         ];
     }
 }

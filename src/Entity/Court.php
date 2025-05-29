@@ -9,6 +9,7 @@ use App\Interface\Arrayable;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Override;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -19,32 +20,32 @@ class Court implements Arrayable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: "integer")]
+    #[ORM\Column(type: Types::INTEGER)]
     private ?int $id = null;
 
-    #[ORM\Column(type: "string", length: 50, unique: true)]
+    #[ORM\Column(type: Types::STRING, length: 50, unique: true)]
     private string $name;
 
-    #[ORM\Column(type: "string", length: 150, nullable: true)]  
+    #[ORM\Column(type: Types::STRING, length: 150, nullable: true)]  
     private ?string $description = null;
 
-    #[ORM\Column(type: "decimal", precision: 10, scale: 2)]
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
     private float $schedulingFee;
 
-    #[ORM\Column(type: "smallint")]
+    #[ORM\Column(type: Types::SMALLINT)]
     private int $capacity;
 
-    #[ORM\Column(type: "boolean")]
+    #[ORM\Column(type: Types::BOOLEAN)]
     private bool $active = true;
 
     #[ORM\ManyToOne(targetEntity: CourtType::class, inversedBy: 'courts')]
     #[ORM\JoinColumn(name: "court_type_id", referencedColumnName: "id", nullable: false)]
     private CourtType $courtType;
 
-    #[ORM\Column(type: "datetime")]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private DateTime $createdAt;
 
-    #[ORM\Column(type: "datetime", nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?DateTime $updatedAt = null;
 
     /**

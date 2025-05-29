@@ -19,15 +19,10 @@ class CourtScheduleController extends AbstractController
 {
     use ResponseUtils;
 
-    private ICourtScheduleRepository $courtScheduleRepository;
-
-    private ICourtRepository $courtRepository;
-
-    public function __construct(ICourtScheduleRepository $courtScheduleRepository, ICourtRepository $courtRepository)
-    {
-        $this->courtScheduleRepository = $courtScheduleRepository;
-        $this->courtRepository = $courtRepository;
-    }
+    public function __construct(
+        private ICourtScheduleRepository $courtScheduleRepository, 
+        private ICourtRepository $courtRepository
+    ) {}
 
     #[Route('/api/court_schedules/{id}', name: 'court_schedules', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function index(int $id, Request $request): JsonResponse

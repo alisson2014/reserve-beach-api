@@ -21,12 +21,9 @@ class CourtTypeController extends AbstractController
 
     public const NOT_FOUND_MESSAGE = 'Tipo de quadra não encontrado.';
 
-    private ICourtTypeRepository $courtTypeRepository;
-
-    public function __construct(ICourtTypeRepository $courtTypeRepository)
-    {
-        $this->courtTypeRepository = $courtTypeRepository;
-    }
+    public function __construct(
+        private ICourtTypeRepository $courtTypeRepository
+    ) {}
 
     #[Route('/api/court_types', name: 'court_types', methods: ['GET'])]
     public function index(Request $request): JsonResponse

@@ -8,14 +8,6 @@ use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<User>
- * 
- * @method User|null getByEmail(string $email)
- * @method User add(User $user, bool $flush = false): User
- * @method User update(User $user, bool $flush = false): User
- * @method void remove(User $entity, bool $flush = false): void
- */
 class UserRepository extends ServiceEntityRepository implements IUserRepository
 {
     public function __construct(ManagerRegistry $registry)

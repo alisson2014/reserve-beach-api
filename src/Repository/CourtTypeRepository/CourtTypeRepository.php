@@ -8,16 +8,6 @@ use App\Entity\CourtType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<CourtType>
- * 
- * @method CourtType|null getById(int $id)
- * @method CourtType add(CourtType $courtType, bool $flush = false): CourtType
- * @method CourtType update(CourtType $courtType, bool $flush = false): CourtType
- * @method void remove(CourtType $entity, bool $flush = false): void
- * @method array getAll(): CourtType[]
- * @method array getByNameLike(): CourtType[]
- */
 class CourtTypeRepository extends ServiceEntityRepository implements ICourtTypeRepository
 {
     public function __construct(ManagerRegistry $registry)
