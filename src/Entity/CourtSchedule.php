@@ -29,14 +29,14 @@ class CourtSchedule implements Arrayable
      * Convenção: 1=Domingo, 2=Segunda, ..., 7=Sábado
      */
     #[ORM\Column(type: Types::INTEGER)]
-    private ?int $dayOfWeek = null;
+    private int $dayOfWeek;
 
     /**
      * A hora de início do slot de agendamento.
      * Ex: 08:00:00, 19:00:00
      */
     #[ORM\Column(type: Types::TIME_MUTABLE)]
-    private ?\DateTime $startTime = null;
+    private \DateTime $startTime;
 
     /**
      * A quadra à qual este horário pertence.
@@ -63,12 +63,12 @@ class CourtSchedule implements Arrayable
         return $this->id;
     }
 
-    public function getDayOfWeek(): ?int
+    public function getDayOfWeek(): int
     {
         return $this->dayOfWeek;
     }
 
-    public function getStartTime(): ?\DateTime
+    public function getStartTime(): \DateTime
     {
         return $this->startTime;
     }
@@ -109,7 +109,7 @@ class CourtSchedule implements Arrayable
             'id' => $this->id,
             'day_of_week' => $this->dayOfWeek,
             'start_time' => $this->startTime?->format('H:i:s'),
-            'court' => $this->court->toArray(),
+            'court_id' => $this->court?->getId(),
         ];
     }
 }

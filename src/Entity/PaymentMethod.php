@@ -88,7 +88,7 @@ class PaymentMethod implements Arrayable
             'name' => $this->name,
             'active' => $this->active,
             'createdAt' => $this->createdAt,
-            'updatedAt' => $this->updatedAt?->format('Y-m-d H:i:s'),
+            'updatedAt' => $this->updatedAt,
         ];
     }
 }

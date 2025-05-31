@@ -83,10 +83,10 @@ class CourtRepository extends ServiceEntityRepository implements ICourtRepositor
 
     public function remove(Court $court, bool $flush = false): void
     {
-        $this->getEntityManager()->remove($court);
-
-        if (!$flush) return;
-
-        $this->getEntityManager()->flush();
+        $court->setDeletedAt(new \DateTime());
+        $this->getEntityManager()->persist($court);
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
     }
 }

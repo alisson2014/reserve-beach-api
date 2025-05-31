@@ -7,8 +7,7 @@ namespace App\Entity;
 use App\Dto\CourtDto;
 use App\Interface\Arrayable;
 use DateTime;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\{ArrayCollection, Collection};
 use Doctrine\DBAL\Types\Types;
 use Override;
 use Doctrine\ORM\Mapping as ORM;
@@ -47,6 +46,9 @@ class Court implements Arrayable
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?DateTime $updatedAt = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?DateTime $deletedAt = null;
 
     /**
      * Coleção de todos os horários de funcionamento desta quadra.
@@ -156,6 +158,16 @@ class Court implements Arrayable
         return $this->updatedAt;
     }
 
+    public function getDeletedAt(): ?DateTime
+    {
+        return $this->deletedAt;
+    }
+
+    public function isDeleted(): bool
+    {
+        return !is_null($this->deletedAt);
+    }
+
     public function setName(string $name): self
     {
         $this->name = $name;
@@ -192,10 +204,17 @@ class Court implements Arrayable
         return $this;
     }
 
+    public function setDeletedAt(?DateTime $deletedAt): self
+    {
+        $this->deletedAt = $deletedAt;
+        return $this;
+    }
+
     #[Override]
     public function __toString(): string
     {
-        return $this->name;
+        $courtType = (string)$this->courtType;
+        return $this->name . "({$courtType})";
     }
 
     #[Override]
@@ -211,6 +230,8 @@ class Court implements Arrayable
             'courtType' => $this->courtType->toArray(),
             'createdAt' => $this->createdAt,
             'updatedAt' => $this->updatedAt,
+            'deletedAt' => $this->deletedAt,
+            'schedules' => array_map(fn(CourtSchedule $schedule) => $schedule->toArray(), $this->schedules->toArray())
         ];
     }
 }
