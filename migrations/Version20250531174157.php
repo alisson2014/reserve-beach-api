@@ -14,7 +14,7 @@ final class Version20250531174157 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return '';
+        return 'Altera tabela de quadras (courts) para adicionar coluna deleted_at, permitindo soft delete.';
     }
 
     public function up(Schema $schema): void
