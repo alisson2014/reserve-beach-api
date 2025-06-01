@@ -16,6 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
+#[Route('/courts')]
 class CourtController extends AbstractController
 {
     use ResponseUtils;
@@ -27,7 +28,7 @@ class CourtController extends AbstractController
         private ICourtTypeRepository $courtTypeRepository
     ) {}
 
-    #[Route('/api/courts', name: 'courts', methods: ['GET'])]
+    #[Route(name: 'courts', methods: ['GET'])]
     public function index(Request $request): JsonResponse
     {
         $name = $request->query->get('name');
@@ -43,7 +44,7 @@ class CourtController extends AbstractController
         return $this->ok($courts);
     }
 
-    #[Route('/api/courts/{id}', name: 'courts_show', methods: ['GET'],  requirements: ['id' => '\d+'])]
+    #[Route('/{id}', name: 'courts_show', methods: ['GET'],  requirements: ['id' => '\d+'])]
     public function show(int $id): JsonResponse
     {
         $court = $this->courtRepository->getById($id);
@@ -55,7 +56,7 @@ class CourtController extends AbstractController
         return $this->ok($court->toArray());
     }
 
-    #[Route('/api/courts', name: 'court_create', methods: ['POST'])]
+    #[Route(name: 'court_create', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function create(Request $request, ValidatorInterface $validator): JsonResponse
     {
@@ -85,7 +86,7 @@ class CourtController extends AbstractController
         return $this->created($court->toArray(), 'Quadra cadastrada com sucesso.');
     }
 
-    #[Route('/api/courts/{id}', name: 'court_update', methods: ['PUT'], requirements: ['id' => '\d+'])]
+    #[Route('/{id}', name: 'court_update', methods: ['PUT'], requirements: ['id' => '\d+'])]
     #[IsGranted('ROLE_ADMIN')]
     public function update(int $id, Request $request, ValidatorInterface $validator): JsonResponse
     {
@@ -121,7 +122,7 @@ class CourtController extends AbstractController
         return $this->ok($court->toArray(), 'Quadra atualizada com sucesso.');
     }
 
-    #[Route('/api/courts/{id}/active', name: 'court_set_active', methods: ['PATCH'], requirements: ['id' => '\d+'])]
+    #[Route('/{id}/active', name: 'court_set_active', methods: ['PATCH'], requirements: ['id' => '\d+'])]
     #[IsGranted('ROLE_ADMIN')]
     public function active(int $id, Request $request): JsonResponse 
     {
@@ -155,7 +156,7 @@ class CourtController extends AbstractController
         return $this->ok($court->toArray(), sprintf('Quadra %s com sucesso.', $newStatus));
     }
 
-    #[Route('/api/courts/{id}', name: 'court_delete', methods: ['DELETE'],  requirements: ['id' => '\d+'])]
+    #[Route('/{id}', name: 'court_delete', methods: ['DELETE'],  requirements: ['id' => '\d+'])]
     #[IsGranted('ROLE_ADMIN')]
     public function delete(int $id): JsonResponse
     {

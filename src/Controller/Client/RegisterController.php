@@ -18,7 +18,7 @@ class RegisterController extends AbstractController
 {
     use ResponseUtils;
 
-    #[Route('/api/client/register', name: 'user_register', methods: ['POST'])]
+    #[Route('/client/register', name: 'user_register', methods: ['POST'])]
     public function index(
         Request $request,
         UserPasswordHasherInterface $passwordHasher,

@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\{Request, JsonResponse, Response};
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+#[Route('/court_types')]
 class CourtTypeController extends AbstractController
 {
     use ResponseUtils;
@@ -25,7 +26,7 @@ class CourtTypeController extends AbstractController
         private ICourtTypeRepository $courtTypeRepository
     ) {}
 
-    #[Route('/api/court_types', name: 'court_types', methods: ['GET'])]
+    #[Route(name: 'court_types', methods: ['GET'])]
     public function index(Request $request): JsonResponse
     {
         $name = $request->query->get('name');
@@ -44,7 +45,7 @@ class CourtTypeController extends AbstractController
         return $this->ok($courtTypes);
     }
 
-    #[Route('/api/court_types/{id}', name: 'court_types_show', methods: ['GET'],  requirements: ['id' => '\d+'])]
+    #[Route('/{id}', name: 'court_types_show', methods: ['GET'],  requirements: ['id' => '\d+'])]
     public function show(int $id): JsonResponse
     {
         $courtType = $this->courtTypeRepository->getById($id);
@@ -56,7 +57,7 @@ class CourtTypeController extends AbstractController
         return $this->ok($courtType->toArray());
     }
 
-    #[Route('/api/court_types', name: 'court_types_create', methods: ['POST'])]
+    #[Route(name: 'court_types_create', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function create(Request $request, ValidatorInterface $validator): JsonResponse
     {
@@ -81,7 +82,7 @@ class CourtTypeController extends AbstractController
         return $this->created($courtType->toArray(), 'Tipo de quadra cadastrado com sucesso!');
     }
 
-    #[Route('/api/court_types/{id}', name: 'court_type_update', methods: ['PUT'], requirements: ['id' => '\d+'])]
+    #[Route('/{id}', name: 'court_type_update', methods: ['PUT'], requirements: ['id' => '\d+'])]
     #[IsGranted('ROLE_ADMIN')]
     public function update(int $id, Request $request, ValidatorInterface $validator): JsonResponse
     {
@@ -111,7 +112,7 @@ class CourtTypeController extends AbstractController
         return $this->ok($courtType->toArray(), 'Tipo de quadra atualizado com sucesso!');
     }
 
-    #[Route('/api/court_types/{id}', name: 'court_type_delete', methods: ['DELETE'],  requirements: ['id' => '\d+'])]
+    #[Route('/{id}', name: 'court_type_delete', methods: ['DELETE'],  requirements: ['id' => '\d+'])]
     #[IsGranted('ROLE_ADMIN')]
     public function delete(int $id): JsonResponse
     {

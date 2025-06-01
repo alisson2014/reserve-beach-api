@@ -19,7 +19,7 @@ class RegisterController extends AbstractController
 {
     use ResponseUtils;
 
-    #[Route('/api/admin/register', name: 'admin_register', methods: ['POST'])]
+    #[Route('/admin/register', name: 'admin_register', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function index(
         Request $request,

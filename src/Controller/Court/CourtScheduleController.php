@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\{Request, JsonResponse, Response};
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
+#[Route('/court_schedules')]
 class CourtScheduleController extends AbstractController
 {
     use ResponseUtils;
@@ -24,7 +25,7 @@ class CourtScheduleController extends AbstractController
         private ICourtRepository $courtRepository
     ) {}
 
-    #[Route('/api/court_schedules/{id}', name: 'court_schedules', methods: ['GET'], requirements: ['id' => '\d+'])]
+    #[Route('/{id}', name: 'court_schedules', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function index(int $id, Request $request): JsonResponse
     {
         $schedules = $this->courtScheduleRepository->getAll($id, $request->query->getInt('dayOfWeek', 0) ?: null);
@@ -41,7 +42,7 @@ class CourtScheduleController extends AbstractController
         return $this->ok($schedulesArray);
     }
 
-    #[Route('/api/court_schedules', name: 'court_schedules_create', methods: ['POST'])]
+    #[Route(name: 'court_schedules_create', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function create(Request $request, ValidatorInterface $validator): JsonResponse
     {
@@ -82,7 +83,7 @@ class CourtScheduleController extends AbstractController
         return $this->ok($ids, 'Horários criados com sucesso.');
     }
 
-    #[Route('/api/court_schedules/delete', name: 'court_schedules_delete', methods: ['POST'])]
+    #[Route('/delete', name: 'court_schedules_delete', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function delete(Request $request): JsonResponse
     {

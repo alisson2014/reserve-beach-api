@@ -18,7 +18,7 @@ class LoginController extends AbstractController
 {
     use ResponseUtils;
 
-    #[Route('/api/user/login', name: 'user_login', methods: ['POST'])]
+    #[Route('/user/login', name: 'user_login', methods: ['POST'])]
     public function index(
         Request $request,
         UserPasswordHasherInterface $passwordHasher,

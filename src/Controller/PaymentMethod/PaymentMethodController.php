@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\{Request, JsonResponse, Response};
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+#[Route('/payment_methods')]
 class PaymentMethodController extends AbstractController
 {
     use ResponseUtils;
@@ -21,7 +22,7 @@ class PaymentMethodController extends AbstractController
         private IPaymentMethodRepository $paymentMethodRepository
     ) {}
 
-    #[Route('/api/payment_methods', name: 'payment_methods', methods: ['GET'])]
+    #[Route(name: 'payment_methods', methods: ['GET'])]
     public function index(Request $request): JsonResponse
     {
         $name = $request->query->get('name');
@@ -35,14 +36,14 @@ class PaymentMethodController extends AbstractController
         return $this->ok($paymentMethods);
     }   
 
-    #[Route('/api/payment_methods/enable', name: 'payment_methods_enable', methods: ['POST'])]
+    #[Route('/enable', name: 'payment_methods_enable', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function enable(Request $request): JsonResponse {
         $data = json_decode($request->getContent(), true);
         return $this->setStatus($data['ids'] ?? []);
     }
 
-    #[Route('/api/payment_methods/disable', name: 'payment_methods_disable', methods: ['POST'])]
+    #[Route('/disable', name: 'payment_methods_disable', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function disable(Request $request): JsonResponse {
         $data = json_decode($request->getContent(), true);
