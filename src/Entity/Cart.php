@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-use App\Dto\CourtDto;
 use App\Enum\CartStatus;
 use App\Interface\Arrayable;
 use DateTime;
-use Doctrine\Common\Collections\{ArrayCollection, Collection};
 use Doctrine\DBAL\Types\Types;
 use Override;
 use Doctrine\ORM\Mapping as ORM;
@@ -75,6 +73,12 @@ class Cart implements Arrayable
     public function setUser(User $user): self
     {
         $this->user = $user;
+        return $this;
+    }
+
+    public function setStatus(CartStatus $status): self
+    {
+        $this->status = $status;
         return $this;
     }
 

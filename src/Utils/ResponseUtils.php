@@ -34,6 +34,11 @@ trait ResponseUtils
         return $this->json(['status' => false, ...compact('message')], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
+    protected function forbidden(string $message): JsonResponse
+    {
+        return $this->json(['status' => false, ...compact('message')], Response::HTTP_FORBIDDEN);
+    }
+
     protected function ok(array|string $data, ?string $message = null): JsonResponse
     {
         return $this->json(

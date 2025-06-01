@@ -10,18 +10,18 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250529223101 extends AbstractMigration
+final class Version20250601214401 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return 'Cria tabela de formas de pagamento';
+        return 'Cria tabela de métodos de pagamento';
     }
 
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql(<<<'SQL'
-            ALTER TABLE payment_methods ADD created_at DATETIME NOT NULL, ADD updated_at DATETIME DEFAULT NULL
+            CREATE TABLE payment_methods (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(50) NOT NULL, active TINYINT(1) NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME DEFAULT NULL, UNIQUE INDEX UNIQ_4FABF9835E237E06 (name), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
         SQL);
     }
 
@@ -29,7 +29,7 @@ final class Version20250529223101 extends AbstractMigration
     {
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql(<<<'SQL'
-            ALTER TABLE payment_methods DROP created_at, DROP updated_at
+            DROP TABLE payment_methods
         SQL);
     }
 }
