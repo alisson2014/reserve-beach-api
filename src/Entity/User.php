@@ -204,6 +204,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Arrayab
 
     public function setRoles(array $roles): self
     {
+        if(!in_array('ROLE_USER', $roles)) {
+            $roles[] = 'ROLE_USER';
+        }
+
         $this->roles = $roles;
         return $this;
     }
