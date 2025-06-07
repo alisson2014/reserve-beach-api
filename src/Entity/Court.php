@@ -6,7 +6,7 @@ namespace App\Entity;
 
 use App\Dto\CourtDto;
 use App\Interface\Arrayable;
-use DateTime;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\{ArrayCollection, Collection};
 use Doctrine\DBAL\Types\Types;
 use Override;
@@ -41,14 +41,14 @@ class Court implements Arrayable
     #[ORM\JoinColumn(name: "court_type_id", referencedColumnName: "id", nullable: false)]
     private CourtType $courtType;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private DateTime $createdAt;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private readonly DateTimeImmutable $createdAt;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?DateTime $updatedAt = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?DateTimeImmutable $updatedAt = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?DateTime $deletedAt = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?DateTimeImmutable $deletedAt = null;
 
     /**
      * Coleção de todos os horários de funcionamento desta quadra.
@@ -58,7 +58,7 @@ class Court implements Arrayable
 
     public function __construct()
     {
-        $this->createdAt = new DateTime();
+        $this->createdAt = new DateTimeImmutable();
         $this->schedules = new ArrayCollection();
     }
 
@@ -110,7 +110,7 @@ class Court implements Arrayable
     #[ORM\PreUpdate]
     public function onPreUpdate(): void
     {
-        $this->updatedAt = new DateTime();
+        $this->updatedAt = new DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -148,17 +148,17 @@ class Court implements Arrayable
         return $this->courtType;
     }
 
-    public function getCreatedAt(): DateTime
+    public function getCreatedAt(): DateTimeImmutable
     {
         return $this->createdAt;
     }   
 
-    public function getUpdatedAt(): ?DateTime
+    public function getUpdatedAt(): ?DateTimeImmutable
     {
         return $this->updatedAt;
     }
 
-    public function getDeletedAt(): ?DateTime
+    public function getDeletedAt(): ?DateTimeImmutable
     {
         return $this->deletedAt;
     }
@@ -204,7 +204,7 @@ class Court implements Arrayable
         return $this;
     }
 
-    public function setDeletedAt(?DateTime $deletedAt): self
+    public function setDeletedAt(?DateTimeImmutable $deletedAt): self
     {
         $this->deletedAt = $deletedAt;
         return $this;

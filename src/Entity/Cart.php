@@ -6,12 +6,15 @@ namespace App\Entity;
 
 use App\Enum\CartStatus;
 use App\Interface\Arrayable;
-use DateTime;
+use App\Repository\CartRepository\CartRepository;
+use DateInterval;
+use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Override;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\{ArrayCollection, Collection};
 
-#[ORM\Entity]
+#[ORM\Entity(CartRepository::class)]
 #[ORM\Table(name: "carts")]
 #[ORM\HasLifecycleCallbacks]
 class Cart implements Arrayable
@@ -28,21 +31,57 @@ class Cart implements Arrayable
     #[ORM\Column(enumType: CartStatus::class, length: 2, options: ["fixed" => true])] 
     private CartStatus $status = CartStatus::OPEN;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private DateTime $createdAt;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private readonly DateTimeImmutable $expiresAt;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?DateTime $updatedAt = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private readonly DateTimeImmutable $createdAt;
 
-    public function __construct()
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?DateTimeImmutable $updatedAt = null;
+
+    #[ORM\OneToMany(targetEntity: CartItem::class, mappedBy: 'cart', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $items;
+
+    public function __construct(User $user)
     {
-        $this->createdAt = new DateTime();
+        $this->user = $user;
+        $this->items = new ArrayCollection();
+        $this->createdAt = new DateTimeImmutable();
+        $this->expiresAt = (new DateTimeImmutable())->add(new DateInterval('PT15M'));
     }   
+
+    /**
+     * @return Collection<int, CartItem>
+     */
+    public function getItems(): Collection
+    {
+        return $this->items;
+    }
+
+    public function addItem(CartItem $item): self
+    {
+        if (!$this->items->contains($item)) {
+            $this->items[] = $item;
+            $item->setCart($this);
+        }
+        return $this;
+    }
+
+    public function removeItem(CartItem $cartItem) 
+    {
+        if ($this->items->removeElement($cartItem)) {
+            if ($cartItem->getCart() === $this) {
+                $cartItem->setCart(null);
+            }
+        }
+        return $this;
+    }
 
     #[ORM\PreUpdate]
     public function onPreUpdate(): void
     {
-        $this->updatedAt = new DateTime();
+        $this->updatedAt = new DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -50,12 +89,17 @@ class Cart implements Arrayable
         return $this->id;
     }
 
-    public function getCreatedAt(): DateTime
+    public function getExpiresAt(): DateTimeImmutable
+    {
+        return $this->expiresAt;
+    }
+
+    public function getCreatedAt(): DateTimeImmutable
     {
         return $this->createdAt;
     }   
 
-    public function getUpdatedAt(): ?DateTime
+    public function getUpdatedAt(): ?DateTimeImmutable
     {
         return $this->updatedAt;
     }
@@ -68,12 +112,6 @@ class Cart implements Arrayable
     public function getUser(): User
     {
         return $this->user;
-    }
-
-    public function setUser(User $user): self
-    {
-        $this->user = $user;
-        return $this;
     }
 
     public function setStatus(CartStatus $status): self

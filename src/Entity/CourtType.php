@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use App\Dto\CourtTypeDto;
-use DateTime;
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use App\Interface\Arrayable;
 use Doctrine\Common\Collections\{ArrayCollection, Collection};
@@ -25,18 +25,18 @@ class CourtType implements Arrayable
     #[ORM\Column(type: Types::STRING, length: 100, unique: true)]
     private string $name;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private DateTime $createdAt;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private DateTimeImmutable $createdAt;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?DateTime $updatedAt = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?DateTimeImmutable $updatedAt = null;
 
     #[ORM\OneToMany(mappedBy: "courtType", targetEntity: Court::class)]
     private Collection $courts;
 
     public function __construct()
     {
-        $this->createdAt = new DateTime();
+        $this->createdAt = new DateTimeImmutable();
         $this->courts = new ArrayCollection();
     }
 
@@ -53,7 +53,7 @@ class CourtType implements Arrayable
     #[ORM\PreUpdate]
     public function onPreUpdate(): void
     {
-        $this->updatedAt = new DateTime();
+        $this->updatedAt = new DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -66,12 +66,12 @@ class CourtType implements Arrayable
         return $this->name;
     }
 
-    public function getCreatedAt(): DateTime
+    public function getCreatedAt(): DateTimeImmutable
     {
         return $this->createdAt;
     }   
 
-    public function getUpdatedAt(): ?DateTime
+    public function getUpdatedAt(): ?DateTimeImmutable
     {
         return $this->updatedAt;
     }
