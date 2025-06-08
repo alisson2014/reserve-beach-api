@@ -11,9 +11,9 @@ interface ICartRepository
 {
     public function getById(int $id): ?Cart;
 
-    public function getAll(int $userId): array;
+    public function all(int $user): array;
 
-    public function getActive(int $userId): ?Cart;
+    public function active(int $user): ?Cart;
 
     public function add(Cart $cart, bool $flush = false): Cart;
 

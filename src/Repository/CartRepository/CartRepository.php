@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository\CartRepository;
 
-use App\Entity\Cart;
+use App\Entity\{Cart, User};
 use App\Enum\CartStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -16,7 +16,7 @@ class CartRepository extends ServiceEntityRepository implements ICartRepository
         parent::__construct($registry, Cart::class);
     }
 
-    public function getAll(int $user): array
+    public function all(int $user): array
     {
         return $this->findBy(compact('user'), ['createdAt' => 'DESC']);
     }
@@ -26,9 +26,10 @@ class CartRepository extends ServiceEntityRepository implements ICartRepository
         return $this->find($id);
     }
 
-    public function getActive(int $user): ?Cart
+    public function active(int $user): ?Cart
     {
-        return $this->findOneBy(['user' => $user, 'status' => CartStatus::OPEN]);
+        $status = CartStatus::OPEN;
+        return $this->findOneBy(compact('user', 'status'));
     }
 
     public function add(Cart $cart, bool $flush = false): Cart

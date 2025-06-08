@@ -63,6 +63,7 @@ class CartItem implements Arrayable
         return $this;
     }
 
+    #[Override]
     public function __toString(): string
     {
         return $this->courtSchedule->getStartTime()->format('Y-m-d H:i:s') . ' - ' . $this->courtSchedule->getDayOfWeek();        
