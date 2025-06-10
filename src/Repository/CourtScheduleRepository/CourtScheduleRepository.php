@@ -36,6 +36,11 @@ class CourtScheduleRepository extends ServiceEntityRepository implements ICourtS
         return $this->find($id);
     }
 
+    public function getByIds(array $ids): array
+    {
+        return $this->findBy(['id' => $ids]);
+    }
+
     public function add(CourtSchedule $courtSchedule, bool $flush = false): CourtSchedule
     {
         $this->getEntityManager()->persist($courtSchedule);

@@ -59,25 +59,6 @@ class Cart implements Arrayable
         return $this->items;
     }
 
-    public function addItem(CartItem $item): self
-    {
-        if (!$this->items->contains($item)) {
-            $this->items[] = $item;
-            $item->setCart($this);
-        }
-        return $this;
-    }
-
-    public function removeItem(CartItem $cartItem) 
-    {
-        if ($this->items->removeElement($cartItem)) {
-            if ($cartItem->getCart() === $this) {
-                $cartItem->setCart(null);
-            }
-        }
-        return $this;
-    }
-
     #[ORM\PreUpdate]
     public function onPreUpdate(): void
     {
@@ -138,6 +119,7 @@ class Cart implements Arrayable
             'id' => $this->getId(),
             'user' => $this->getUser()->toArray(),
             'status' => $this->getStatus(),
+            'items' => array_map(fn(CartItem $item): array => $item->toArray(), $this->getItems()->toArray()),
             'createdAt' => $this->getCreatedAt(),
             'updatedAt' => $this->getUpdatedAt(),
         ];

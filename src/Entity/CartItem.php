@@ -21,7 +21,7 @@ class CartItem implements Arrayable
 
     #[ORM\ManyToOne(targetEntity: Cart::class, inversedBy: 'items')]
     #[ORM\JoinColumn(name: "cart_id", referencedColumnName: "id", nullable: false)]
-    private readonly ?Cart $cart;
+    private readonly Cart $cart;
 
     #[ORM\ManyToOne(targetEntity: CourtSchedule::class)]
     #[ORM\JoinColumn(name: "court_schedule_id", referencedColumnName: "id", nullable: false)]
@@ -57,12 +57,6 @@ class CartItem implements Arrayable
         return $this->addedAt;
     }
 
-    public function setCart(?Cart $cart): self
-    {
-        $this->cart = $cart;
-        return $this;
-    }
-
     #[Override]
     public function __toString(): string
     {
@@ -75,8 +69,8 @@ class CartItem implements Arrayable
         return [
             'id' => $this->id,
             'cart_id' => $this->cart->getId(),
-            'court_schedule_id' => $this->courtSchedule->getId(),
-            'added_at' => $this->addedAt,
+            'court_schedule_id' => $this->courtSchedule->toArray(),
+            'added_at' => $this->addedAt->format('c'),
         ];
     }
 }

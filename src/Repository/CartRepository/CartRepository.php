@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository\CartRepository;
 
-use App\Entity\{Cart, User};
+use App\Entity\Cart;
 use App\Enum\CartStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
