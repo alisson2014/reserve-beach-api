@@ -2,11 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Controller\Api;
+namespace App\Controller\Cart;
 
-use App\Entity\Cart;
-use App\Entity\CartItem;
-use App\Entity\CourtSchedule;
+use App\Entity\{Cart, CartItem, CourtSchedule};
 use App\Repository\CartItemRepository\ICartItemRepository;
 use App\Repository\CartRepository\ICartRepository;
 use App\Repository\CourtScheduleRepository\ICourtScheduleRepository;

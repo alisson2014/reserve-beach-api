@@ -39,6 +39,9 @@ class LoginController extends AbstractController
             return $this->unauthorized('Credenciais inválidas.');
         }
 
-        return $this->ok($jwtManager->create($user), 'Login realizado com sucesso.');
+        return $this->ok([
+            'token' => $jwtManager->create($user),
+            'user' => $user->toArray()
+        ], 'Login realizado com sucesso.');
     }
 }
