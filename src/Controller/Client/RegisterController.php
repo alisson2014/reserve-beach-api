@@ -14,11 +14,12 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
+#[Route('/client/register')]
 class RegisterController extends AbstractController
 {
     use ResponseUtils;
 
-    #[Route('/client/register', name: 'user_register', methods: ['POST'])]
+    #[Route(name: 'user_register', methods: ['POST'])]
     public function index(
         Request $request,
         UserPasswordHasherInterface $passwordHasher,
@@ -34,7 +35,7 @@ class RegisterController extends AbstractController
         }
 
         if ($userRepository->getByEmail($data['email'])) {
-            return $this->conflict('Email já cadastrado.');
+            return $this->conflict('Email já cadastrado em nosso sistema.');
         }
 
         $user = User::get($registerDto);

@@ -230,8 +230,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Arrayab
             'phone' => $this->phone,
             'cpf' => $this->cpf,
             'birthDate' => $this->birthDate,
-            'createdAt' => $this->createdAt,
-            'updatedAt' => $this->updatedAt,
+            'createdAt' => $this->createdAt?->format('Y-m-d H:i:s'),
+            'updatedAt' => $this->updatedAt?->format('Y-m-d H:i:s'),
             'roles' => $this->roles
         ];
     }
