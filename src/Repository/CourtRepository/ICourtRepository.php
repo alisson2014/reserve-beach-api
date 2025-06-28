@@ -10,7 +10,7 @@ interface ICourtRepository
 {
     public function getAll(): array;
 
-    public function getActive(?string $name = null, ?CourtType $courtType = null): array;
+    public function findAll(?string $name = null, ?CourtType $courtType = null, ?bool $active = null): array;
 
     public function getById(int $id): ?Court;
 

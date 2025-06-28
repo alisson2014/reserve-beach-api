@@ -10,6 +10,7 @@ use App\Repository\CourtRepository\ICourtRepository;
 use App\Repository\CourtTypeRepository\ICourtTypeRepository;
 use App\Utils\ResponseUtils;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\{Request, JsonResponse, Response};
 use Symfony\Component\Routing\Annotation\Route;
@@ -25,7 +26,8 @@ class CourtController extends AbstractController
 
     public function __construct(
         private ICourtRepository $courtRepository, 
-        private ICourtTypeRepository $courtTypeRepository
+        private ICourtTypeRepository $courtTypeRepository,
+        private EntityManagerInterface $entityManager
     ) {}
 
     #[Route(name: 'courts', methods: ['GET'])]
@@ -33,12 +35,13 @@ class CourtController extends AbstractController
     {
         $name = $request->query->get('name');
         $type = $request->query->get('type');
+        $active = $request->query->get('active');
 
-        $courtType = $this->courtTypeRepository->getById(intval($type));
+        $courtType = $type ? $this->courtTypeRepository->getById(intval($type)) : null;
 
         $courts = array_map(
             fn (Court $court): array => $court->toArray(),
-            $this->courtRepository->getActive($name, $courtType)
+            $this->courtRepository->findAll($name, $courtType, $active)
         );
 
         return $this->ok($courts);
@@ -60,9 +63,7 @@ class CourtController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function create(Request $request, ValidatorInterface $validator): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-
-        $courtDto = CourtDto::fromArray($data);
+        $courtDto = CourtDto::fromArray($request->toArray());
 
         if (count($errors = $validator->validate($courtDto)) > 0) {
             return $this->badRequest($errors);
@@ -90,9 +91,7 @@ class CourtController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function update(int $id, Request $request, ValidatorInterface $validator): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-
-        $courtDto = CourtDto::fromArray($data);
+        $courtDto = CourtDto::fromArray($request->toArray());
 
         if (count($errors = $validator->validate($courtDto)) > 0) {
             return $this->badRequest($errors);
@@ -122,38 +121,43 @@ class CourtController extends AbstractController
         return $this->ok($court->toArray(), 'Quadra atualizada com sucesso.');
     }
 
-    #[Route('/{id}/active', name: 'court_set_active', methods: ['PATCH'], requirements: ['id' => '\d+'])]
+    #[Route('/active', name: 'court_set_active', methods: ['PATCH'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function active(int $id, Request $request): JsonResponse 
+    public function setActive(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
+        $data = $request->toArray();
 
+        $ids = $data['ids'] ?? [];
         $active = $data['active'] ?? null;
 
         if (!is_bool($active)) {
             return $this->json([
-                'status' => false, 
+                'status' => false,
                 'errors' => [
                     'active' => ['Campo ativo deve ser um booleano.']
                 ]
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        $court = $this->courtRepository->getById($id);
-
-        if (is_null($court)) {
-            return $this->notFoundResource(self::NOT_FOUND_MESSAGE);
-        }
-
         try {
-            $court = $this->courtRepository->setActive($court, $active, true);
+            foreach ($ids as $id) {
+                $court = $this->courtRepository->getById($id);
+
+                if (is_null($court)) {
+                    return $this->notFoundResource(self::NOT_FOUND_MESSAGE . " (ID: $id)");
+                }
+
+                $this->courtRepository->setActive($court, $active);
+            }
         } catch (\Exception $ex) {
-            return $this->internalServerError('Erro ao atualizar quadra: ' . $ex->getMessage());
+            return $this->internalServerError('Erro ao atualizar quadras: ' . $ex->getMessage());
         }
 
-        $newStatus = $active ? 'ativada' : 'desativada';
+        $this->entityManager->flush();
 
-        return $this->ok($court->toArray(), sprintf('Quadra %s com sucesso.', $newStatus));
+        $newStatus = $active ? 'ativadas' : 'desativadas';
+
+        return $this->ok([], sprintf('Quadras %s com sucesso.', $newStatus));
     }
 
     #[Route('/{id}', name: 'court_delete', methods: ['DELETE'],  requirements: ['id' => '\d+'])]

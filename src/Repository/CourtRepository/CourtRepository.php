@@ -6,6 +6,7 @@ namespace App\Repository\CourtRepository;
 
 use App\Entity\Court;
 use App\Entity\CourtType;
+use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -21,14 +22,17 @@ class CourtRepository extends ServiceEntityRepository implements ICourtRepositor
         return $this->findAll();
     }
 
-    public function getActive(?string $name = null, ?CourtType $courtType = null): array
+    public function findAll(?string $name = null, ?CourtType $courtType = null, ?bool $active = null): array
     {
-        $qb = $this->createQueryBuilder('c')
-            ->andWhere('c.active = :active')
-            ->setParameter('active', true);
+        $qb = $this->createQueryBuilder('c');
+
+        if (!is_null($active)) {
+            $qb->andWhere('c.active = :active')
+                ->setParameter('active', $active);
+        }
 
         if (!is_null($name)) {
-            $name = str_replace(' ', '%', $name);
+            $name = '%' . str_replace(' ', '%', $name) . '%';
 
             $qb->andWhere('c.name LIKE :name')
                 ->setParameter('name', trim($name));
@@ -83,7 +87,7 @@ class CourtRepository extends ServiceEntityRepository implements ICourtRepositor
 
     public function remove(Court $court, bool $flush = false): void
     {
-        $court->setDeletedAt(new \DateTime());
+        $court->setDeletedAt(new DateTimeImmutable());
         $this->getEntityManager()->persist($court);
         if ($flush) {
             $this->getEntityManager()->flush();
