@@ -25,6 +25,7 @@ class CourtRepository extends ServiceEntityRepository implements ICourtRepositor
     public function findAll(?string $name = null, ?CourtType $courtType = null, ?bool $active = null): array
     {
         $qb = $this->createQueryBuilder('c');
+        $qb->where('c.deletedAt IS NULL');
 
         if (!is_null($active)) {
             $qb->andWhere('c.active = :active')
