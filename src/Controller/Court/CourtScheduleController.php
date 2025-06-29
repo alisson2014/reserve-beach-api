@@ -18,6 +18,8 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 #[Route('/court_schedules')]
 class CourtScheduleController extends AbstractController
 {
+    public const string NOT_FOUND_MESSAGE = 'Horário não encontrado.';
+    
     use ResponseUtils;
 
     public function __construct(
@@ -31,11 +33,11 @@ class CourtScheduleController extends AbstractController
         $schedules = $this->courtScheduleRepository->getAll($id, $request->query->getInt('dayOfWeek', 0) ?: null);
 
         if (empty($schedules)) {
-            return $this->notFoundResource('Nenhum horário encontrado para esta quadra.');
+            return $this->notFoundResource(self::NOT_FOUND_MESSAGE);
         }
 
         $schedulesArray = array_map(
-            fn ($schedule) => $schedule->toArray(),
+            fn (CourtSchedule $schedule): array => $schedule->toArray(),
             $schedules
         );
 
@@ -46,7 +48,7 @@ class CourtScheduleController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function create(Request $request, ValidatorInterface $validator): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
+        $data = $request->toArray();
 
         if (!is_array($data) || empty($data)) {
             return $this->json(['status' => false, 'message' => 'O payload deve ser um array de horários.'], Response::HTTP_BAD_REQUEST);
@@ -64,7 +66,7 @@ class CourtScheduleController extends AbstractController
 
             $court = $this->courtRepository->getById($courtScheduleDto->courtId);
             if (is_null($court)) {
-                return $this->notFoundResource("Quadra não encontrada para o ID: {$courtScheduleDto->courtId}.");
+                return $this->notFoundResource(self::NOT_FOUND_MESSAGE . "ID: {$courtScheduleDto->courtId}.");
             }
 
             $courtSchedule = CourtSchedule::get($courtScheduleDto, $court);
@@ -98,7 +100,7 @@ class CourtScheduleController extends AbstractController
             $courtSchedule = $this->courtScheduleRepository->getById($idDelete);
 
             if (is_null($courtSchedule)) {
-                return $this->notFoundResource("Horário não encontrado para o ID: {$idDelete}.");
+                return $this->notFoundResource(self::NOT_FOUND_MESSAGE . " ID: {$idDelete}.");
             }
 
             $this->courtScheduleRepository->remove($courtSchedule, false);

@@ -37,6 +37,9 @@ class Court implements Arrayable
     #[ORM\Column(type: Types::BOOLEAN)]
     private bool $active = true;
 
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
+    private ?string $imageUrl = null;
+
     #[ORM\ManyToOne(targetEntity: CourtType::class, inversedBy: 'courts')]
     #[ORM\JoinColumn(name: "court_type_id", referencedColumnName: "id", nullable: false)]
     private CourtType $courtType;
@@ -143,6 +146,11 @@ class Court implements Arrayable
         return $this->active;
     }
 
+    public function getImageUrl(): ?string
+    {
+        return $this->imageUrl;
+    }
+
     public function getCourtType(): CourtType
     {
         return $this->courtType;
@@ -198,6 +206,12 @@ class Court implements Arrayable
         return $this;
     }
 
+    public function setImageUrl(?string $imageUrl): self
+    {
+        $this->imageUrl = $imageUrl;
+        return $this;
+    }
+
     public function setCourtType(CourtType $courtType): self
     {
         $this->courtType = $courtType;
@@ -220,6 +234,11 @@ class Court implements Arrayable
     #[Override]
     public function toArray(): array
     {
+        $schedules = array_map(
+            fn(CourtSchedule $schedule): array => $schedule->toArray(),
+            $this->schedules->toArray()
+        );
+
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -227,11 +246,12 @@ class Court implements Arrayable
             'schedulingFee' => $this->schedulingFee,
             'capacity' => $this->capacity,
             'active' => $this->active,
+            'imageUrl' => $this->imageUrl,
             'courtType' => $this->courtType->toArray(),
-            'createdAt' => $this->createdAt,
-            'updatedAt' => $this->updatedAt,
-            'deletedAt' => $this->deletedAt,
-            'schedules' => array_map(fn(CourtSchedule $schedule) => $schedule->toArray(), $this->schedules->toArray())
+            'createdAt' => $this->createdAt->format('Y-m-d H:i:s'),
+            'updatedAt' => $this->updatedAt?->format('Y-m-d H:i:s'),
+            'deletedAt' => $this->deletedAt?->format('Y-m-d H:i:s'),
+            'schedules' => $schedules
         ];
     }
 }

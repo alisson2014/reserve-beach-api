@@ -6,6 +6,7 @@ namespace App\Controller\Court;
 
 use App\Dto\CourtDto;
 use App\Entity\Court;
+use App\Entity\CourtType;
 use App\Repository\CourtRepository\ICourtRepository;
 use App\Repository\CourtTypeRepository\ICourtTypeRepository;
 use App\Utils\ResponseUtils;
@@ -34,14 +35,14 @@ class CourtController extends AbstractController
     public function index(Request $request): JsonResponse
     {
         $name = $request->query->get('name');
-        $type = $request->query->get('type');
+        $type = $request->query->get('type') ?: CourtType::BEACH_TENNIS;
         $active = $request->query->get('active');
 
-        $courtType = $type ? $this->courtTypeRepository->getById(intval($type)) : null;
+        $courtType = $this->courtTypeRepository->getById(intval($type));
 
         $courts = array_map(
             fn (Court $court): array => $court->toArray(),
-            $this->courtRepository->findAll($name, $courtType, $active)
+            $this->courtRepository->all($name, $courtType, $active)
         );
 
         return $this->ok($courts);

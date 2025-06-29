@@ -39,6 +39,13 @@ class CourtSchedule implements Arrayable
     private \DateTime $startTime;
 
     /**
+     * A hora de término do slot de agendamento.
+     * Ex: 09:00:00, 20:00:00
+     */
+    #[ORM\Column(type: Types::TIME_MUTABLE)]
+    private \DateTime $endTime;
+
+    /**
      * A quadra à qual este horário pertence.
      */
     #[ORM\ManyToOne(targetEntity: Court::class, inversedBy: 'schedules')]
@@ -53,6 +60,7 @@ class CourtSchedule implements Arrayable
 
         $courtSchedule->setDayOfWeek($courtDto->dayOfWeek);
         $courtSchedule->setStartTime($courtDto->startTime);
+        $courtSchedule->setEndTime($courtDto->endTime);
         $courtSchedule->setCourt($court);
 
         return $courtSchedule;
@@ -73,6 +81,11 @@ class CourtSchedule implements Arrayable
         return $this->startTime;
     }
 
+    public function getEndTime(): \DateTime
+    {
+        return $this->endTime;
+    }
+
     public function getCourt(): ?Court
     {
         return $this->court;
@@ -87,6 +100,12 @@ class CourtSchedule implements Arrayable
     public function setStartTime(\DateTime $startTime): self
     {
         $this->startTime = $startTime;
+        return $this;
+    }
+
+    public function setEndTime(\DateTime $endTime): self
+    {
+        $this->endTime = $endTime;
         return $this;
     }
 
@@ -109,6 +128,7 @@ class CourtSchedule implements Arrayable
             'id' => $this->id,
             'day_of_week' => $this->dayOfWeek,
             'start_time' => $this->startTime?->format('H:i:s'),
+            'end_time' => $this->endTime?->format('H:i:s'),
             'court_id' => $this->court?->getId(),
         ];
     }

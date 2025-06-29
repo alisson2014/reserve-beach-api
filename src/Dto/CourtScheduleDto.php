@@ -12,9 +12,12 @@ class CourtScheduleDto implements Dto, Arrayable
     #[Assert\NotBlank(message: 'O horário de início é obrigatório.')]
     public ?\DateTimeInterface $startTime = null;
 
+    #[Assert\NotBlank(message: 'O horário de término é obrigatório.')]
+    public ?\DateTimeInterface $endTime = null;
+
     #[Assert\NotBlank(message: 'O dia da semana é obrigatório.')]
     #[Assert\Type(type: 'integer', message: 'O dia da semana deve ser um número inteiro.')]
-    #[Assert\Range(min: 1, max: 7, notInRangeMessage: 'O dia da semana deve ser entre 1 (Domingo) e 7 (Sábado).')]
+    #[Assert\Range(min: 0, max: 6, notInRangeMessage: 'O dia da semana deve ser entre 0 (Domingo) e 6 (Sábado).')]
     public ?int $dayOfWeek = null;
 
     #[Assert\NotBlank(message: 'O ID da quadra é obrigatório.')]
@@ -23,10 +26,12 @@ class CourtScheduleDto implements Dto, Arrayable
 
     public function __construct(
         ?\DateTimeInterface $startTime = null,
+        ?\DateTimeInterface $endTime = null,
         ?int $dayOfWeek = null,
         ?int $courtId = null
     ) {
         $this->startTime = $startTime;
+        $this->endTime = $endTime;  
         $this->dayOfWeek = $dayOfWeek;
         $this->courtId = $courtId;
     }
@@ -35,6 +40,7 @@ class CourtScheduleDto implements Dto, Arrayable
     {
         return new self(
             isset($data['startTime']) ? new \DateTime($data['startTime']) : null,
+            isset($data['endTime']) ? new \DateTime($data['endTime']) : null,
             $data['dayOfWeek'] ?? null,
             $data['courtId'] ?? null
         );
@@ -44,6 +50,7 @@ class CourtScheduleDto implements Dto, Arrayable
     {
         return [
             'startTime' => $this->startTime?->format('Y-m-d H:i:s'),
+            'endTime' => $this->endTime?->format('Y-m-d H:i:s'),
             'dayOfWeek' => $this->dayOfWeek,
             'courtId' => $this->courtId,
         ];

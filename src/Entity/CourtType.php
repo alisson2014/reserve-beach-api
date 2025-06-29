@@ -17,6 +17,8 @@ use Doctrine\DBAL\Types\Types;
 #[ORM\HasLifecycleCallbacks]
 class CourtType implements Arrayable
 {
+    public const int BEACH_TENNIS = 1;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER)]
@@ -99,8 +101,8 @@ class CourtType implements Arrayable
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'createdAt' => $this->createdAt,
-            'updatedAt' => $this->updatedAt,
+            'createdAt' => $this->createdAt->format("Y-m-d H:i:s"),
+            'updatedAt' => $this->updatedAt?->format("Y-m-d H:i:s"),
         ];
     }
 }

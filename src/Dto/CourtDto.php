@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Dto;
 
+use App\Entity\CourtType;
 use App\Interface\Arrayable;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -29,7 +30,10 @@ final class CourtDto implements Dto, Arrayable
     #[Assert\Type(type: 'boolean', message: 'O campo ativo deve ser verdadeiro ou falso.')]
     public bool $active = true; 
 
-    #[Assert\NotBlank(message: 'O tipo de quadra é obrigatório.')]
+    #[Assert\Length(max: 255, maxMessage: 'A URL da imagem não pode ter mais de {{ limit }} caracteres.')]
+    #[Assert\Url(message: 'A URL da imagem deve ser uma URL válida.')]
+    public ?string $imageUrl = null;
+
     #[Assert\Type(type: 'integer', message: 'O tipo de quadra deve ser um número inteiro.')]
     #[Assert\GreaterThan(value: 0, message: 'O tipo de quadra deve ser um número inteiro positivo.')]
     public ?int $courtTypeId = null;
@@ -40,6 +44,7 @@ final class CourtDto implements Dto, Arrayable
         ?float $schedulingFee = null,
         ?int $capacity = null,
         bool $active = true,
+        ?string $imageUrl = null,
         ?int $courtTypeId = null
     ) {
         $this->name = $name;
@@ -47,6 +52,7 @@ final class CourtDto implements Dto, Arrayable
         $this->schedulingFee = $schedulingFee;
         $this->capacity = $capacity;
         $this->active = $active;
+        $this->imageUrl = $imageUrl;
         $this->courtTypeId = $courtTypeId;
     }
 
@@ -55,10 +61,11 @@ final class CourtDto implements Dto, Arrayable
         return new self(
             $data['name'] ?? null, 
             $data['description'] ?? null,
-            isset($data['schedulingFee']) && is_float($data['schedulingFee']) ? $data['schedulingFee'] : null,
+            isset($data['schedulingFee']) ? $data['schedulingFee'] : null,
             $data['capacity'] ?? null,
             $data['active'] ?? true,
-            isset($data['courtTypeId']) && is_int($data['courtTypeId']) ? $data['courtTypeId'] : null
+            $data['imageUrl'] ?? null,
+            isset($data['courtTypeId']) && is_int($data['courtTypeId']) ? $data['courtTypeId'] : CourtType::BEACH_TENNIS
         );
     }
 
@@ -70,6 +77,7 @@ final class CourtDto implements Dto, Arrayable
             'schedulingFee' => $this->schedulingFee,
             'capacity' => $this->capacity,
             'active' => $this->active,
+            'imageUrl' => $this->imageUrl,
             'courtTypeId' => $this->courtTypeId,
         ];
     }
