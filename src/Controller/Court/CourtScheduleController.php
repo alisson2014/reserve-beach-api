@@ -85,32 +85,16 @@ class CourtScheduleController extends AbstractController
         return $this->ok($ids, 'Horários criados com sucesso.');
     }
 
-    #[Route('/delete', name: 'court_schedules_delete', methods: ['POST'])]
+    #[Route('/{courtId}/court', name: 'court_schedules_delete_by_court', methods: ['DELETE'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function delete(Request $request): JsonResponse
+    public function deleteByCourt(int $courtId): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-
-        if (!is_array($data) || empty($data)) {
-            return $this->json(['status' => false, 'message' => 'O payload deve ser um array não vázio com os ids para exclusão.'], Response::HTTP_BAD_REQUEST);
+        $court = $this->courtRepository->getById($courtId);
+        if (is_null($court)) {
+            return $this->notFoundResource(self::NOT_FOUND_MESSAGE . "ID: {$courtId}.");
         }
 
-        $deleted = 0;
-        foreach ($data as $idDelete) {
-            $courtSchedule = $this->courtScheduleRepository->getById($idDelete);
-
-            if (is_null($courtSchedule)) {
-                return $this->notFoundResource(self::NOT_FOUND_MESSAGE . " ID: {$idDelete}.");
-            }
-
-            $this->courtScheduleRepository->remove($courtSchedule, false);
-            $deleted++; 
-        }
-
-        if ($deleted > 0) {
-            $this->courtScheduleRepository->flush();
-        }
-
-        return $this->ok((string)$deleted, 'Horários removidos com sucesso.');
+        $this->courtScheduleRepository->removeByCourt($court);
+        return $this->ok([], 'Horários removidos com sucesso.');
     }
 }

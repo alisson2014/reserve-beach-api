@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository\CourtScheduleRepository;
 
+use App\Entity\Court;
 use App\Entity\CourtSchedule;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -50,6 +51,20 @@ class CourtScheduleRepository extends ServiceEntityRepository implements ICourtS
         }
 
         return $courtSchedule;
+    }
+
+    public function removeByCourt(Court $court, bool $flush = false): void
+    {
+        $queryBuilder = $this->createQueryBuilder('cs')
+            ->delete()
+            ->where('cs.court = :court')
+            ->setParameter('court', $court);
+
+        $queryBuilder->getQuery()->execute();
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
     }
 
     public function remove(CourtSchedule $courtSchedule, bool $flush = false): void

@@ -126,10 +126,10 @@ class CourtSchedule implements Arrayable
     {
         return [
             'id' => $this->id,
-            'day_of_week' => $this->dayOfWeek,
-            'start_time' => $this->startTime?->format('H:i:s'),
-            'end_time' => $this->endTime?->format('H:i:s'),
-            'court_id' => $this->court?->getId(),
+            'dayOfWeek' => $this->dayOfWeek,
+            'startTime' => $this->startTime?->format('H:i:s'),
+            'endTime' => $this->endTime?->format('H:i:s'),
+            'courtId' => $this->court?->getId(),
         ];
     }
 }

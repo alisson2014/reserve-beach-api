@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository\CourtScheduleRepository;
 
-use App\Entity\CourtSchedule;
+use App\Entity\{Court, CourtSchedule};
 
 interface ICourtScheduleRepository
 {
@@ -16,6 +16,8 @@ interface ICourtScheduleRepository
     public function getByIds(array $ids): array;    
 
     public function add(CourtSchedule $courtSchedule, bool $flush = false): CourtSchedule;
+
+    public function removeByCourt(Court $court, bool $flush = false): void;
 
     public function remove(CourtSchedule $courtSchedule, bool $flush = false): void;
 
