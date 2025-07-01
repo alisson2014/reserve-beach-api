@@ -102,6 +102,7 @@ class Court implements Arrayable
 
         $court->name = $courtDto->name;
         $court->description = $courtDto->description;
+        $court->imageUrl = $courtDto->imageUrl;
         $court->schedulingFee = $courtDto->schedulingFee;
         $court->capacity = $courtDto->capacity;
         $court->active = $courtDto->active;
