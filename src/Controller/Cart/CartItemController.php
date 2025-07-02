@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\{JsonResponse, Request, Response};
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/carts/active/items')]
+#[Route('/cart/items')]
 #[IsGranted('ROLE_USER')] 
 class CartItemController extends AbstractController
 {
@@ -31,6 +31,7 @@ class CartItemController extends AbstractController
     ) {}
 
     #[Route(name: 'cart_item_create', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
     public function create(Request $request): JsonResponse
     {
         $user = $this->getUser();
@@ -43,6 +44,7 @@ class CartItemController extends AbstractController
 
         $data = $request->toArray();
         $courtScheduleIds = $data['courtScheduleIds'] ?? null;
+        $scheduleDate = new \DateTimeImmutable($data['scheduleDate'] ?? null);
 
         if (empty($courtScheduleIds) || !is_array($courtScheduleIds)) {
             return $this->json([
@@ -76,13 +78,13 @@ class CartItemController extends AbstractController
         $items = [];
 
         foreach ($schedules as $schedule) {
-            if ($this->cartItemRepository->findOneByUserAndSchedule($user, $schedule)) {
+            if ($this->cartItemRepository->findOneByUserAndSchedule($user, $schedule, $scheduleDate)) {
                 return $this->conflict("O horário para a quadra '{$schedule->getCourt()->getName()}' no dia {$schedule->getStartTime()->format('d/m/Y H:i')} já está no seu carrinho.");
             }
             
             // Validação: O horário está disponível?
 
-            $cartItem = new CartItem($cart, $schedule);
+            $cartItem = new CartItem($cart, $schedule, $scheduleDate);
             $this->cartItemRepository->add($cartItem);
             $items[] = $cartItem->toArray();
         }
@@ -93,8 +95,26 @@ class CartItemController extends AbstractController
             return $this->internalServerError('Erro ao criar os horários: ' . $e->getMessage());
         }
 
-        $ids = array_map(fn(CourtSchedule $schedule): ?int => $schedule->getId(), $courtSchedules);
+        return $this->created([], 'Itens adicionados com sucesso.');
+    }
 
-        return $this->ok($ids, 'Itens adicionados com sucesso.');
+    #[Route(name: 'cart_item_get', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function getInfoCart() 
+    {
+        $user = $this->getUser();
+        if (is_null($user)) {
+            return $this->unauthorized('Usuário não autenticado.');
+        }
+
+        $user = $this->userRepository->getByEmail($user->getUserIdentifier());
+        $cart = $this->cartRepository->active($user->getId());
+        if (is_null($cart)) {
+            return $this->notFoundResource('Carrinho não encontrado ou não está ativo.');
+        }       
+
+        $details = $this->cartRepository->findDetailedItems($cart->getId());
+
+        return $this->ok($details, 'Detalhes do carrinho obtidos com sucesso.');
     }
 }

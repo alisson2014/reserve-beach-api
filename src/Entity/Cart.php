@@ -120,8 +120,9 @@ class Cart implements Arrayable
             'user' => $this->getUser()->toArray(),
             'status' => $this->getStatus(),
             'items' => array_map(fn(CartItem $item): array => $item->toArray(), $this->getItems()->toArray()),
-            'createdAt' => $this->getCreatedAt(),
-            'updatedAt' => $this->getUpdatedAt(),
+            'createdAt' => $this->createdAt->format('Y-m-d H:i:s'),
+            'updatedAt' => $this->updatedAt?->format('Y-m-d H:i:s'),
+            'expiresAt' => $this->expiresAt->format('Y-m-d H:i:s'),
         ];
     }
 }

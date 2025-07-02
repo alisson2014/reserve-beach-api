@@ -32,6 +32,45 @@ class CartRepository extends ServiceEntityRepository implements ICartRepository
         return $this->findOneBy(compact('user', 'status'));
     }
 
+/**
+     * @param int $cartId
+     * @return array
+     */
+    public function findDetailedItems(int $cartId): array
+    {
+        $query = $this->createQueryBuilder('cart')
+            ->select(
+                'court.name AS courtName',
+                'court.schedulingFee',
+                'item.id AS cartItemId',
+                'item.scheduleDate',
+                'schedule.startTime', 
+                'schedule.endTime'   
+            )
+            ->innerJoin('cart.items', 'item')
+            ->innerJoin('item.courtSchedule', 'schedule')
+            ->innerJoin('schedule.court', 'court')
+            ->where('cart.id = :cartId')
+            ->setParameter('cartId', $cartId)
+            ->getQuery();
+        $results = $query->getArrayResult();
+
+        $formattedResults = array_map(function ($item) {
+            if (isset($item['scheduleDate']) && $item['scheduleDate'] instanceof \DateTimeInterface) {
+                $item['scheduleDate'] = $item['scheduleDate']->format('Y-m-d');
+            }
+            if (isset($item['startTime']) && $item['startTime'] instanceof \DateTimeInterface) {
+                $item['startTime'] = $item['startTime']->format('H:i');
+            }
+            if (isset($item['endTime']) && $item['endTime'] instanceof \DateTimeInterface) {
+                $item['endTime'] = $item['endTime']->format('H:i');
+            }
+            return $item;
+        }, $results);
+
+        return $formattedResults;
+    }
+
     public function add(Cart $cart, bool $flush = false): Cart
     {
         $this->getEntityManager()->persist($cart);

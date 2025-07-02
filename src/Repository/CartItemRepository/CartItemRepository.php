@@ -6,6 +6,7 @@ namespace App\Repository\CartItemRepository;
 
 use App\Entity\{CartItem, CourtSchedule, User};
 use App\Enum\CartStatus;
+use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -41,16 +42,18 @@ class CartItemRepository extends ServiceEntityRepository implements ICartItemRep
      * Verifica se um determinado horário de quadra já existe no carrinho ativo de um usuário.
      * Essencial para evitar adicionar itens duplicados.
      */
-    public function findOneByUserAndSchedule(User $user, CourtSchedule $courtSchedule): ?CartItem
+    public function findOneByUserAndSchedule(User $user, CourtSchedule $courtSchedule, DateTimeImmutable $scheduleDate): ?CartItem
     {
         return $this->createQueryBuilder('ci')
             ->innerJoin('ci.cart', 'c')
             ->where('c.user = :user')
             ->andWhere('c.status = :status')
             ->andWhere('ci.courtSchedule = :courtSchedule')
+            ->andWhere('ci.scheduleDate = :scheduleDate')
             ->setParameter('user', $user)
             ->setParameter('status', CartStatus::OPEN)
             ->setParameter('courtSchedule', $courtSchedule)
+            ->setParameter('scheduleDate', $scheduleDate)
             ->getQuery()
             ->getOneOrNullResult();
     }

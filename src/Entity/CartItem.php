@@ -27,13 +27,17 @@ class CartItem implements Arrayable
     #[ORM\JoinColumn(name: "court_schedule_id", referencedColumnName: "id", nullable: false)]
     private readonly CourtSchedule $courtSchedule;
 
+    #[ORM\Column(type: Types::DATE_IMMUTABLE)]
+    private readonly DateTimeImmutable $scheduleDate;
+
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private DateTimeImmutable $addedAt;
 
-    public function __construct(Cart $cart, CourtSchedule $courtSchedule)
+    public function __construct(Cart $cart, CourtSchedule $courtSchedule, DateTimeImmutable $scheduleDate)
     {
         $this->cart = $cart;
         $this->courtSchedule = $courtSchedule;
+        $this->scheduleDate = $scheduleDate;
         $this->addedAt = new DateTimeImmutable();
     }
 
@@ -57,6 +61,11 @@ class CartItem implements Arrayable
         return $this->addedAt;
     }
 
+    public function getScheduleDate(): DateTimeImmutable
+    {
+        return $this->scheduleDate;
+    }
+
     #[Override]
     public function __toString(): string
     {
@@ -68,9 +77,10 @@ class CartItem implements Arrayable
     {
         return [
             'id' => $this->id,
-            'cart_id' => $this->cart->getId(),
-            'court_schedule_id' => $this->courtSchedule->toArray(),
-            'added_at' => $this->addedAt->format('c'),
+            'cartId' => $this->cart->getId(),
+            'courtSchedule' => $this->courtSchedule->toArray(),
+            'scheduleDate' => $this->scheduleDate->format('c'),
+            'addedAt' => $this->addedAt->format('c'),
         ];
     }
 }

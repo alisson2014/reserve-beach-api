@@ -15,6 +15,8 @@ interface ICartRepository
 
     public function active(int $user): ?Cart;
 
+    public function findDetailedItems(int $cart): array;
+
     public function add(Cart $cart, bool $flush = false): Cart;
 
     public function setStatus(Cart $cart, CartStatus $status, bool $flush = false): Cart;
