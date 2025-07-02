@@ -13,6 +13,8 @@ interface ICourtScheduleRepository
 
     public function getById(int $id): ?CourtSchedule;
 
+    public function getByCourtAndDayOfWeek(Court $court, int $dayOfWeek): array;
+
     public function getByIds(array $ids): array;    
 
     public function add(CourtSchedule $courtSchedule, bool $flush = false): CourtSchedule;

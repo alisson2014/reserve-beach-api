@@ -44,6 +44,24 @@ class CourtScheduleController extends AbstractController
         return $this->ok($schedulesArray);
     }
 
+    #[Route('/{courtId}/dayOfWeek/{dayOfWeek}', name: 'court_schedules_by_court_and_day_of_week', methods: ['GET'], requirements: ['courtId' => '\d+', 'dayOfWeek' => '\d+'])]
+    public function getByCourtAndDayOfWeek(int $courtId, int $dayOfWeek): JsonResponse
+    {
+        $court = $this->courtRepository->getById($courtId);
+        if (is_null($court)) {
+            return $this->notFoundResource(self::NOT_FOUND_MESSAGE . "ID: {$courtId}.");
+        }
+
+        $schedules = $this->courtScheduleRepository->getByCourtAndDayOfWeek($court, $dayOfWeek);
+
+        $schedulesArray = array_map(
+            fn (CourtSchedule $schedule): array => $schedule->toArray(),
+            $schedules
+        );
+
+        return $this->ok($schedulesArray);
+    }
+
     #[Route(name: 'court_schedules_create', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function create(Request $request, ValidatorInterface $validator): JsonResponse
