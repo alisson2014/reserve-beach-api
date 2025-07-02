@@ -20,6 +20,11 @@ class CartItemRepository extends ServiceEntityRepository implements ICartItemRep
         parent::__construct($registry, CartItem::class);
     }
 
+    public function get(int $id): ?CartItem
+    {
+        return $this->find($id);
+    }
+
     public function add(CartItem $cartItem, bool $flush = false): CartItem
     {
         $this->getEntityManager()->persist($cartItem);
@@ -36,6 +41,17 @@ class CartItemRepository extends ServiceEntityRepository implements ICartItemRep
             $this->getEntityManager()->flush();
         }
         return $cartItem;
+    }
+
+    public function removeByIds(array $ids, bool $flush = false): void
+    {
+        $cartItems = $this->findBy(['id' => $ids]);
+        foreach ($cartItems as $cartItem) {
+            $this->remove($cartItem, false);
+        }
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
     }
 
     /**

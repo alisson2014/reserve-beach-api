@@ -117,4 +117,22 @@ class CartItemController extends AbstractController
 
         return $this->ok($details, 'Detalhes do carrinho obtidos com sucesso.');
     }
+
+    #[Route('/delete', name: 'cart_item_delete', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function deleteItens(Request $request): JsonResponse
+    {
+        $data = $request->toArray();
+        $ids = $data['ids'] ?? null;
+
+        if (empty($ids) || !is_array($ids)) {
+            return $this->json([
+                'status' => false, 
+                'errors' => ['ids' => 'IDs são obrigatórios e devem ser um array']
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $this->cartItemRepository->removeByIds($ids, true);
+        return $this->noContent();
+    }
 }
