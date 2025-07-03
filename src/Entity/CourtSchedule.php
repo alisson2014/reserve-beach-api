@@ -6,6 +6,7 @@ namespace App\Entity;
 
 use App\Dto\CourtScheduleDto;
 use App\Interface\Arrayable;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
 use Override;
@@ -51,6 +52,14 @@ class CourtSchedule implements Arrayable
     #[ORM\ManyToOne(targetEntity: Court::class, inversedBy: 'schedules')]
     #[ORM\JoinColumn(name: 'court_id', referencedColumnName: 'id', nullable: false)]
     private ?Court $court = null;
+
+    /**
+     * Coleção de agendamentos associados a este horário.
+     * Usado para verificar se o horário já está ocupado.
+     */
+    #[ORM\OneToMany(mappedBy: 'courtSchedule', targetEntity: Schedule::class)]
+    #[ORM\JoinColumn(name: 'court_schedule_id', referencedColumnName: 'id', nullable: true)]
+    private Collection $schedules;
 
     public static function get(CourtScheduleDto $courtDto, Court $court, ?self $courtSchedule = null): self
     {

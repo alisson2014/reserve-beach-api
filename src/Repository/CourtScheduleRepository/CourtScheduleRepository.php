@@ -40,8 +40,10 @@ class CourtScheduleRepository extends ServiceEntityRepository implements ICourtS
     public function getByCourtAndDayOfWeek(Court $court, int $dayOfWeek): array
     {
         return $this->createQueryBuilder('cs')
+            ->leftJoin('cs.schedules', 's')
             ->where('cs.court = :court')
             ->andWhere('cs.dayOfWeek = :dayOfWeek')
+            ->andWhere('s.id IS NULL') 
             ->setParameter('court', $court)
             ->setParameter('dayOfWeek', $dayOfWeek)
             ->getQuery()

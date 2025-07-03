@@ -52,6 +52,7 @@ class CartRepository extends ServiceEntityRepository implements ICartRepository
             ->innerJoin('item.courtSchedule', 'schedule')
             ->innerJoin('schedule.court', 'court')
             ->where('cart.id = :cartId')
+            ->andWhere('item.active = true')
             ->setParameter('cartId', $cartId)
             ->getQuery();
         $results = $query->getArrayResult();

@@ -43,6 +43,16 @@ class CartItemRepository extends ServiceEntityRepository implements ICartItemRep
         return $cartItem;
     }
 
+    public function disable(CartItem $cartItem, bool $flush = false): CartItem
+    {
+        $cartItem->setActive(false);
+        $this->getEntityManager()->persist($cartItem);
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+        return $cartItem;
+    }
+
     public function removeByIds(array $ids, bool $flush = false): void
     {
         $cartItems = $this->findBy(['id' => $ids]);

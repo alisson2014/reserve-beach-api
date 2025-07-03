@@ -6,6 +6,7 @@ namespace App\Controller\Schedule;
 
 use App\Dto\ScheduleDto;
 use App\Entity\Schedule;
+use App\Repository\CartItemRepository\ICartItemRepository;
 use App\Repository\CourtScheduleRepository\ICourtScheduleRepository;
 use App\Repository\PaymentMethodRepository\IPaymentMethodRepository;
 use App\Repository\ScheduleRepository\IScheduleRepository;
@@ -26,6 +27,7 @@ class ScheduleController extends AbstractController
 
     public function __construct(
         private IScheduleRepository $scheduleRepository,
+        private ICartItemRepository $cartItemRepository,
         private IUserRepository $userRepository,
         private ICourtScheduleRepository $courtScheduleRepository,
         private IPaymentMethodRepository $paymentMethodRepository
@@ -59,6 +61,7 @@ class ScheduleController extends AbstractController
             $schedule->setPaymentMethod($this->paymentMethodRepository->getById($scheduleDto->paymentMethodId));
 
             $schedules[] = $this->scheduleRepository->add($schedule, true);
+            $this->cartItemRepository->disable($this->cartItemRepository->get($item['cartItemId']), true);
         }
 
         return $this->ok($schedules, "Agendamentos criados com sucesso.");

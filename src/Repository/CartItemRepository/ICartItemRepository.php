@@ -18,4 +18,6 @@ interface ICartItemRepository
     public function removeByIds(array $ids, bool $flush = false): void;
 
     public function findOneByUserAndSchedule(User $user, CourtSchedule $courtSchedule, DateTimeImmutable $dateScheduled): ?CartItem;
+
+    public function disable(CartItem $cartItem, bool $flush = false): CartItem;
 }

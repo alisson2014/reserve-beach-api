@@ -33,11 +33,15 @@ class CartItem implements Arrayable
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private DateTimeImmutable $addedAt;
 
-    public function __construct(Cart $cart, CourtSchedule $courtSchedule, DateTimeImmutable $scheduleDate)
+    #[ORM\Column(type: Types::BOOLEAN)]
+    private bool $active = true;
+
+    public function __construct(Cart $cart, CourtSchedule $courtSchedule, DateTimeImmutable $scheduleDate, bool $active = true)
     {
         $this->cart = $cart;
         $this->courtSchedule = $courtSchedule;
         $this->scheduleDate = $scheduleDate;
+        $this->active = $active;
         $this->addedAt = new DateTimeImmutable();
     }
 
@@ -66,6 +70,16 @@ class CartItem implements Arrayable
         return $this->scheduleDate;
     }
 
+    public function isActive(): bool
+    { 
+        return $this->active;
+    }
+
+    public function setActive(bool $active): void
+    {
+        $this->active = $active;
+    }
+
     #[Override]
     public function __toString(): string
     {
@@ -81,6 +95,7 @@ class CartItem implements Arrayable
             'courtSchedule' => $this->courtSchedule->toArray(),
             'scheduleDate' => $this->scheduleDate->format('c'),
             'addedAt' => $this->addedAt->format('c'),
+            'active' => $this->active,
         ];
     }
 }
