@@ -23,9 +23,4 @@ class ScheduleRepository extends ServiceEntityRepository implements IScheduleRep
         }
         return $schedule;
     }
-
-    public function getEntityManager(): \Doctrine\ORM\EntityManagerInterface
-    {
-        return $this->_em;
-    }
 }

@@ -50,28 +50,11 @@ class Schedule implements Arrayable
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
     private ?string $transactionId = null;
 
-    public function __construct()
+    public function __construct(User $user, CourtSchedule $courtSchedule)
     {
+        $this->courtSchedule = $courtSchedule;
+        $this->user = $user;
         $this->createdAt = new DateTimeImmutable();
-    }
-
-    public static function get(
-        ScheduleDto $scheduleDto,
-        ?self $schedule = null,
-        EntityManagerInterface $em
-    ): self
-    {
-        if (is_null($schedule)) {
-            $schedule = new self();
-        }
-
-        $schedule->user = $em->find(User::class, $scheduleDto->userId);
-        $schedule->courtSchedule = $em->find(CourtSchedule::class, $scheduleDto->courtScheduleId);
-        $schedule->scheduledAt = $scheduleDto->scheduledAt;
-        $schedule->totalValue = $scheduleDto->totalValue;
-        $schedule->paymentMethod = $em->find(PaymentMethod::class, $scheduleDto->paymentMethodId);
-
-        return $schedule;
     }
 
     #[ORM\PreUpdate]

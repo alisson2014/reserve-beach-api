@@ -6,6 +6,8 @@ namespace App\Controller\Schedule;
 
 use App\Dto\ScheduleDto;
 use App\Entity\Schedule;
+use App\Repository\CourtScheduleRepository\ICourtScheduleRepository;
+use App\Repository\PaymentMethodRepository\IPaymentMethodRepository;
 use App\Repository\ScheduleRepository\IScheduleRepository;
 use App\Repository\UserRepository\IUserRepository;
 use App\Utils\ResponseUtils;
@@ -24,7 +26,9 @@ class ScheduleController extends AbstractController
 
     public function __construct(
         private IScheduleRepository $scheduleRepository,
-        private IUserRepository $userRepository
+        private IUserRepository $userRepository,
+        private ICourtScheduleRepository $courtScheduleRepository,
+        private IPaymentMethodRepository $paymentMethodRepository
     ) {}
 
     #[Route(name: 'schedules', methods: ['POST'])]
@@ -49,11 +53,14 @@ class ScheduleController extends AbstractController
                 return $this->badRequest($validationErrors);
             }
 
-            $schedule = Schedule::get($scheduleDto, em: $this->scheduleRepository->getEntityManager());
-            $schedules[] = $schedule;
-            $this->scheduleRepository->add($schedule);
+            $schedule = new Schedule($user, $this->courtScheduleRepository->getById($scheduleDto->courtScheduleId));
+            $schedule->setScheduledAt($scheduleDto->scheduledAt);
+            $schedule->setTotalValue($scheduleDto->totalValue);
+            $schedule->setPaymentMethod($this->paymentMethodRepository->getById($scheduleDto->paymentMethodId));
+
+            $schedules[] = $this->scheduleRepository->add($schedule, true);
         }
 
-        return $this->json($schedules);
+        return $this->ok($schedules, "Agendamentos criados com sucesso.");
     }
 }

@@ -44,6 +44,7 @@ class CartRepository extends ServiceEntityRepository implements ICartRepository
                 'court.schedulingFee',
                 'item.id AS cartItemId',
                 'item.scheduleDate',
+                'schedule.id AS courtScheduleId',
                 'schedule.startTime', 
                 'schedule.endTime'   
             )
