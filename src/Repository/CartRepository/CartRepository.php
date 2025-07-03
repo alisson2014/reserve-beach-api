@@ -89,4 +89,59 @@ class CartRepository extends ServiceEntityRepository implements ICartRepository
         }
         return $cart;
     }
+
+    /**
+     * Prepara um resumo do carrinho para a tela de pagamento.
+     *
+     * @param int $cartId O ID do carrinho.
+     * @return array Retorna um array com os itens e o valor total.
+     */
+    public function getPaymentSummary(int $cartId): array
+    {
+        $itemsQuery = $this->createQueryBuilder('cart')
+            ->select(
+                'court.name as courtName',
+                'court.schedulingFee',
+                'item.scheduleDate',
+                'schedule.startTime',
+                'schedule.endTime'
+            )
+            ->innerJoin('cart.items', 'item')
+            ->innerJoin('item.courtSchedule', 'schedule')
+            ->innerJoin('schedule.court', 'court')
+            ->where('cart.id = :cartId')
+            ->setParameter('cartId', $cartId)
+            ->getQuery();
+
+        $items = $itemsQuery->getArrayResult();
+
+        $summary = [
+            'items' => [],
+            'totalAmount' => 0.0,
+        ];
+
+        foreach ($items as $item) {
+            $scheduleDate = ($item['scheduleDate'] instanceof \DateTimeInterface)
+                ? $item['scheduleDate']->format('d/m/Y')
+                : 'Data inválida';
+
+            $startTime = ($item['startTime'] instanceof \DateTimeInterface)
+                ? $item['startTime']->format('H:i')
+                : '';
+
+            $endTime = ($item['endTime'] instanceof \DateTimeInterface)
+                ? $item['endTime']->format('H:i')
+                : '';
+
+            $summary['items'][] = [
+                'courtName' => $item['courtName'],
+                'schedule' => sprintf('%s das %s às %s', $scheduleDate, $startTime, $endTime),
+                'price' => $item['schedulingFee'],
+            ];
+
+            $summary['totalAmount'] += $item['schedulingFee'];
+        }
+
+        return $summary;
+    }
 }

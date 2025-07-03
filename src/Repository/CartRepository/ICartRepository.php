@@ -17,6 +17,8 @@ interface ICartRepository
 
     public function findDetailedItems(int $cart): array;
 
+    public function getPaymentSummary(int $cartId): array;
+
     public function add(Cart $cart, bool $flush = false): Cart;
 
     public function setStatus(Cart $cart, CartStatus $status, bool $flush = false): Cart;

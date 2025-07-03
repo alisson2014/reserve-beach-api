@@ -26,7 +26,7 @@ class PaymentMethodController extends AbstractController
     public function index(Request $request): JsonResponse
     {
         $name = $request->query->get('name');
-        $active = $request->query->get('active');
+        $active = boolval($request->query->get('active'));
 
         $paymentMethods = array_map(
             fn ($paymentMethod) => $paymentMethod->toArray(),

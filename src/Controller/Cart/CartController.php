@@ -109,4 +109,17 @@ class CartController extends AbstractController
 
         return $this->ok($cart->toArray(), 'Status do carrinho atualizado com sucesso.');
     }
+
+    #[Route('/{cartId}/summary', name: 'cart_payment_summary', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function getPaymentSummary(int $cartId): JsonResponse
+    {
+        $summary = $this->cartRepository->getPaymentSummary($cartId);
+
+        if (empty($summary)) {
+            return $this->notFoundResource('Resumo do carrinho não encontrado.');
+        }
+
+        return $this->ok($summary, 'Resumo do carrinho obtido com sucesso.');
+    }
 }
