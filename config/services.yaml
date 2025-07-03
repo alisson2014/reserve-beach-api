@@ -33,6 +33,8 @@ services:
         alias: App\Repository\PaymentMethodRepository\PaymentMethodRepository
     App\Repository\CartRepository\ICartRepository:
         alias: App\Repository\CartRepository\CartRepository
+    App\Repository\ScheduleRepository\IScheduleRepository:
+        alias: App\Repository\ScheduleRepository\ScheduleRepository
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

@@ -56,6 +56,8 @@ class CartRepository extends ServiceEntityRepository implements ICartRepository
         $results = $query->getArrayResult();
 
         $formattedResults = array_map(function ($item) {
+            $item['schedulingFee'] = (float) $item['schedulingFee'];
+            
             if (isset($item['scheduleDate']) && $item['scheduleDate'] instanceof \DateTimeInterface) {
                 $item['scheduleDate'] = $item['scheduleDate']->format('Y-m-d');
             }
