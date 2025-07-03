@@ -30,30 +30,28 @@ class Schedule implements Arrayable
     private ?DateTimeImmutable $updatedAt = null;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
-    private readonly DateTimeImmutable $scheduledAt;
+    private DateTimeImmutable $scheduledAt;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'schedules')]
     #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id", nullable: false)]
-    private readonly User $user;
+    private User $user;
 
     #[ORM\ManyToOne(targetEntity: CourtSchedule::class, inversedBy: 'schedules')]
     #[ORM\JoinColumn(name: "court_schedule_id", referencedColumnName: "id", nullable: false)]
-    private readonly CourtSchedule $courtSchedule;
+    private CourtSchedule $courtSchedule;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
-    private readonly float $totalValue;
+    private float $totalValue;
 
     #[ORM\ManyToOne(targetEntity: PaymentMethod::class)]
     #[ORM\JoinColumn(name: "payment_method_id", referencedColumnName: "id", nullable: false)]
-    private readonly PaymentMethod $paymentMethod;
+    private PaymentMethod $paymentMethod;
 
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
     private ?string $transactionId = null;
 
-    public function __construct(User $user, CourtSchedule $courtSchedule)
+    public function __construct()
     {
-        $this->courtSchedule = $courtSchedule;
-        $this->user = $user;
         $this->createdAt = new DateTimeImmutable();
     }
 
@@ -126,6 +124,16 @@ class Schedule implements Arrayable
     public function setPaymentMethod(PaymentMethod $paymentMethod): void
     {
         $this->paymentMethod = $paymentMethod;
+    }
+
+    public function setUser(User $user): void
+    {
+        $this->user = $user;
+    }
+
+    public function setCourtSchedule(CourtSchedule $courtSchedule): void
+    {
+        $this->courtSchedule = $courtSchedule;
     }
 
     #[Override]

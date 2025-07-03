@@ -55,7 +55,9 @@ class ScheduleController extends AbstractController
                 return $this->badRequest($validationErrors);
             }
 
-            $schedule = new Schedule($user, $this->courtScheduleRepository->getById($scheduleDto->courtScheduleId));
+            $schedule = new Schedule();
+            $schedule->setUser($user);
+            $schedule->setCourtSchedule($this->courtScheduleRepository->getById($scheduleDto->courtScheduleId));
             $schedule->setScheduledAt($scheduleDto->scheduledAt);
             $schedule->setTotalValue($scheduleDto->totalValue);
             $schedule->setPaymentMethod($this->paymentMethodRepository->getById($scheduleDto->paymentMethodId));
@@ -65,5 +67,32 @@ class ScheduleController extends AbstractController
         }
 
         return $this->ok($schedules, "Agendamentos criados com sucesso.");
+    }
+
+    #[Route('/today', name: 'schedule_of_day', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function schedulesOfDay(): JsonResponse
+    {
+        $schedules = $this->scheduleRepository->getByDate();
+        // if (empty($schedules)) {
+        //     return $this->notFoundResource(self::NOT_FOUND_MESSAGE);
+        // }
+
+        return $this->ok($schedules, "Agendamentos do dia.");
+    }
+
+    #[Route(name: 'schedule_get', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function mySchedules(): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->unauthorized('Usuário não autenticado.');
+        }
+
+        $user = $this->userRepository->getByEmail($user->getUserIdentifier());
+        $schedules = $this->scheduleRepository->getByUserId($user->getId());
+
+        return $this->ok($schedules, "Agendamentos do usuário.");
     }
 }

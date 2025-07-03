@@ -8,6 +8,7 @@ use App\Dto\RegisterDto;
 use App\Enum\UserStatus;
 use App\Interface\Arrayable;
 use DateTimeImmutable;
+use Doctrine\Common\Collections\{ArrayCollection, Collection};
 use Doctrine\ORM\Mapping as ORM;
 use Override;
 use Symfony\Component\Security\Core\User\{UserInterface, PasswordAuthenticatedUserInterface};
@@ -56,9 +57,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Arrayab
     #[ORM\Column(type: Types::JSON)]
     private array $roles = ['ROLE_USER'];
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Schedule::class, cascade: ['persist', 'remove'])]
+    private Collection $schedules;
+
     public function __construct()
     {
         $this->createdAt = new DateTimeImmutable();
+        $this->schedules = new ArrayCollection();
     }
 
     public static function get(RegisterDto $registerDto, ?self $user = null): self
@@ -152,6 +157,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Arrayab
     public function getBirthDate(): ?DateTimeImmutable 
     {
         return $this->birthDate;
+    }
+
+    public function getSchedules(): Collection
+    {
+        return $this->schedules;
     }
 
     public function setName(string $name): self 
